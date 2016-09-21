@@ -1,6 +1,6 @@
 'use strict';
 
-var istex = require('node-istex');
+var istex = require('node-istex').defaults({ extraQueryString: { sid: 'ezpaarse' }});
 // loading correspondence file ezpaarse rtype with istex rtype
 var data  = require('./istex-rtype.json');
 var cache = ezpaarse.lib('cache')('istex');
@@ -75,7 +75,7 @@ module.exports = function () {
       report.inc('general', 'istex-queries');
       self.logger.verbose('Istex: resolving a paquet of %d ECs', packet.length);
 
-      istex.findlot(unitids, function (err, list) {
+      istex.findByIstexIds(unitids, function (err, list) {
 
         if (err || !Array.isArray(list)) {
 
