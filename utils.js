@@ -35,7 +35,10 @@ exports.bufferedProcess = function (mw, options) {
       if (!busy) {
         drainBuffer()
           .then(() => { lastCallback(); })
-          .catch(err => { this.job._stop(err); });
+          .catch(err => {
+            mw.logger.error(err.message);
+            mw.job._stop(err);
+          });
       }
       return;
     }
@@ -52,7 +55,8 @@ exports.bufferedProcess = function (mw, options) {
 
         if (typeof lastCallback === 'function') { lastCallback(); }
       }).catch(err => {
-        this.job._stop(err);
+        mw.logger.error(err.message);
+        mw.job._stop(err);
       });
     }
   };
@@ -66,9 +70,11 @@ exports.bufferedProcess = function (mw, options) {
       groups: new Map()
     };
 
+    let maxGroupSize = 0;
+
     function fullPacket () {
       if (typeof groupBy === 'function') {
-        return packet.groups.size >= packetSize;
+        return maxGroupSize >= packetSize;
       }
       return packet.ecs.length >= packetSize;
     }
@@ -96,12 +102,15 @@ exports.bufferedProcess = function (mw, options) {
       }
 
       if (typeof groupBy === 'function') {
-        const group = groupBy(ec);
+        const groupId = groupBy(ec);
+        const group = packet.groups.get(groupId);
 
-        if (!packet.groups.has(group)) {
-          packet.groups.set(group, [ec]);
+        if (group) {
+          group.push([ec, done]);
+          maxGroupSize = Math.max(maxGroupSize, group.length);
         } else {
-          packet.groups.get(group).push(ec);
+          packet.groups.set(groupId, [[ec, done]]);
+          maxGroupSize = Math.max(maxGroupSize, 1);
         }
       }
 
@@ -118,15 +127,9 @@ exports.bufferedProcess = function (mw, options) {
     return co(function* () {
       while (buffer.length >= bufferSize || (lastCallback && buffer.length > 0)) {
         const packet = yield getPacket();
-
-        try {
-          const res = onPacket(packet);
-          if (res instanceof Promise) {
-            yield res;
-          }
-        } catch (e) {
-          mw.logger.error(e.message);
-          mw.job._stop(e);
+        const res = onPacket(packet);
+        if (res instanceof Promise) {
+          yield res;
         }
       }
     });
