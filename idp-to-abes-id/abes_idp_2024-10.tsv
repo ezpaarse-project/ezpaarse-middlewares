@@ -1,0 +1,381 @@
+id_abes	IDP
+ABES5UKB8Q9SF	https://idp3.hec.fr/idp/shibboleth
+ABESHOK8EU6BY	https://idp-agrocampus-ouest.renater.fr/idp/shibboleth
+ABES3LTHOA8R4	https://idp1.agroparistech.fr/idp/shibboleth
+ABESCWN7PF5JA	https://idpv3.univ-amu.fr/idp/shibboleth
+ABESYO1DG65P4	https://idp.ensam.eu/idp/shibboleth
+ABESGBN2TDFYS	http://adfs.devinci.fr/adfs/services/trust
+ABES3ON817CVS	https://sts.windows.net/7a879e87-03b2-441a-a2e3-3bbdc5b62f1f/
+ABESECQDVK6WK	https://idp.bnu.fr/idp/shibboleth
+ABESEZKCHDH7A	https://sso.bordeaux-inp.fr/idp/shibboleth
+ABESGFH4L014Z	https://idp.enitab.fr/idp/shibboleth
+ABESUNZE6OP4J	https://baragwin.brest-bs.com/idp/shibboleth
+ABES6SYA537TM	https://idp.brgm.fr/idp/shibboleth
+ABESBLYJJ228V	https://idp.chru-lille.fr/idp/shibboleth
+ABESJEZ1M53IE	https://idp.cirad.fr/idp/shibboleth
+ABESI7U3KFDEC	https://janus.cnrs.fr/idp
+ABES6P53K85WW	https://i-id.cea.fr/fed
+ABESFKVDJ5H74	https://idp.u-cergy.fr/idp/shibboleth
+ABESHG96EY2CE	https://identites.ec-lyon.fr/idp/shibboleth
+ABESAMW6TFAW6	https://shibbov3-vm.ec-nantes.fr/idp/shibboleth
+ABES6DKG5G4LJ	https://auth.centrale-marseille.fr/idp/shibboleth
+ABES4PUETX3TK	https://shib3.mines-ales.fr/idp/shibboleth
+ABESHUM1LF9RS	https://idp.enac.fr/idp/shibboleth
+ABES6JO3UNFYV	https://idp.enpc.fr/saml/metadata
+ABESKWT1LH7LH	https://idp.lyon.archi.fr/idp/shibboleth
+ABESA894QS1BD	https://idp.toulouse.archi.fr/idp/shibboleth
+ABES92M4SQIAD	https://auth.chimie-paristech.fr/idp/saml2/metadata
+ABES9KZFUFG6P	https://idp.ensma.fr/idp/shibboleth
+ABESIAI5BQ2SX	https://identite.ensta-bretagne.fr/idp/shibboleth
+ABESAHXKQE7PM	https://shibboleth.ensta.fr/idp/shibboleth
+ABES2MG81A1ZR	https://idp2.emse.fr/idp/shibboleth
+ABES5SGDMDIRE	https://idp.vet-alfort.fr/idp/shibboleth
+ABES1DFEJD1V1	https://idp.ens-lyon.fr/idp/shibboleth
+ABESB5ZNZGLK4	https://federation.ens.psl.eu/idp/shibboleth
+ABESCLYCPWA1G	https://idp.polytechnique.fr/idp/shibboleth
+ABES4HZA1LACI	https://idp.ehesp.fr/idp/shibboleth
+ABES5BT89MDVX	https://idp.ens-paris-saclay.fr/idp/shibboleth
+ABES83TFM5IGO	https://vip.espci.fr/saml2/idp/metadata.php
+ABESC5JEUHA57	
+ABES7YQ7OU3XE	https://sts.windows.net/517085ff-c1f1-4b90-8a7f-ed8816109cfe/
+ABESDNL7SI5WR	https://ident.groupe-esa.fr/idp/shibboleth
+ABESDWWF6S8KM	https://idp.ifremer.fr/idp/shibboleth
+ABES95U4CWAHB	https://idp.imt-atlantique.fr/idp/shibboleth
+ABES3YCF38DVK	https://multipass.imt-nord-europe.fr/idp/shibboleth
+ABES2CH7UPHFA	https://shib.mines-albi.fr/idp/shibboleth
+ABES5YO9WM2QP	https://authentification.prive.ineris.fr/nidp/saml2/metadata
+ABES3CR6PW4KU	https://authentification.inrae.fr/saml/metadata/idp
+ABES8PTG6A1VH	https://idp1.inria.fr/idp/shibboleth
+ABES66F2PIEJ3	https://authentification.inrs.fr/adfs
+ABESGC61SY9VU	https://idp-insa-cvl.renater.fr/idp/shibboleth
+ABESK7IHUW4JS	https://shibboleth.insa-rouen.fr/idp/shibboleth
+ABES5Z65DG71F	https://login.insa-lyon.fr/idp/shibboleth
+ABES6FL2ZH9TE	https://idp.insa-rennes.fr/idp/shibboleth
+ABESG9MEDR4Q7	https://sso.insa-strasbourg.fr/idp/shibboleth
+ABESC1O8LK1L0	https://idp.inserm.fr/idp/shibboleth
+ABES4SV5FC841	https://idp-ihes.renater.fr/idp/shibboleth
+ABES6WTH79G4L	https://federation.sciences-po.fr/idp/shibboleth
+ABES3HW2KAIBL	https://idpr4.imtbs-tsp.eu/idp/shibboleth
+ABESG20EV62ZK	https://idp.inp-toulouse.fr/idp/shibboleth
+ABESHI5GV85J6	https://identities.univ-jfc.fr/idp/prod
+ABES5O9FJTKGG	https://idp.pasteur.fr/idp/shibboleth
+ABESH7UB99GNH	http://fs.unilasalle.fr/adfs/services/trust
+ABESCGRIG95TI	https://eliot.isae.fr/idp/shibboleth
+ABES9JR4OYDVK	https://sso.ird.fr/idp/shibboleth
+ABESDZ59SXFU3	https://websso.esrf.fr/auth/realms/ESRF | https://idp.ill.fr/idp/shibboleth
+ABESFIA5QI70F	https://idp.univ-lemans.fr/idp/shibboleth
+ABESDXO7CRA5R	https://idp.mines-paristech.fr/idp/shibboleth
+ABES8FFCNFFF2	https://idp3.mnhn.fr/idp/shibboleth
+ABESG3O6DS1HT	https://shibboleth3.obspm.fr/idp/shibboleth
+ABES5T23LJ3MZ	https://idp.oniris-nantes.fr/realms/master
+ABESG3HHKL5TZ	https://sts.windows.net/b78d03e6-f6a2-4cff-83be-847d1a6453f9/
+ABES5MH8APKFB	https://auth.id.sorbonne-universite.fr/saml/metadata
+ABES9PEVI6OR6	https://idp.telecom-paristech.fr/idp/shibboleth
+ABESBHDDB7B8G	https://shibone.univ-catholille.fr/idp/shibboleth
+ABES3CO7TDE3H	urn:mace:cru.fr:federation:univ-lyon1.fr
+ABESA1M1958SJ	https://idp.uca.fr/idp/shibboleth
+ABESE2C5CI2KA	https://idp.univ-cotedazur.fr/idp/shibboleth
+ABESJ9X9BECVU	https://shibboleth.univ-evry.fr/idp/shibboleth
+ABESBHH1IY5Y8	urn:mace:cru.fr:federation:univ-angers.fr
+ABES70RCI79FA	https://idp.univ-artois.fr/idp/shibboleth
+ABES4FL9A1DD4	https://idp3.univ-avignon.fr/idp/shibboleth
+ABESJRSDJ5HMX	https://idp-ubx.u-bordeaux.fr/idp/shibboleth
+ABES7OQ2HBKJU	https://shibboleth.u-bourgogne.fr/idp/shibboleth
+ABES6RWFVV3PK	https://federation3.univ-brest.fr/idp/shibboleth
+ABESAXR5PCFZT	urn:mace:cru.fr:federation:univ-ubs.fr
+ABES4GJIJL6KH	https://idp4.unicaen.fr/idp/shibboleth
+ABES3ZFJBHFV2	https://shibboleth.univ-corse.fr/idp/shibboleth
+ABES84H5X47X1	https://idp1.univ-fcomte.fr/idp/shibboleth
+ABES4LY86X9XN	https://idp-univ-guyane.renater.fr/idp/shibboleth
+ABES65B8TB3ZE	https://idp.uha.fr/idp/shibboleth
+ABES5TAB0B2CQ	https://shib2.unc.nc/idp/shibboleth
+ABES6HM5FY88M	https://federation.upf.pf/idp/shibboleth
+ABES2JOFTGCID	https://id.univ-reunion.fr/idp/shibboleth
+ABES5U8CVCA9J	https://apps.univ-lr.fr/idp/shibboleth
+ABES2PW71U8OR	https://idp.univ-lille.fr/idp/shibboleth
+ABES2QUI6X6T6	urn:mace:cru.fr:federation:unilim.fr
+ABES2LC9J8H32	https://idp3.univ-lorraine.fr/idp/shibboleth
+ABESHRT3HM5Q8	https://federation.umontpellier.fr/idp/shibboleth
+ABESEKFVK6FZ6	urn:mace:cru.fr:federation:univ-nantes.fr
+ABESIBPFQT2JN	https://federation.unimes.fr/idp/shibboleth
+ABES7T27PECMK	https://idp.univ-pau.fr/idp/shibboleth
+ABESADN2TN9X8	https://federation2.univ-perp.fr/idp/shibboleth
+ABES8TY6DE9I6	https://idp.u-picardie.fr/idp/shibboleth
+ABESG6EKNCBCY	urn:mace:cru.fr:federation:univ-poitiers.fr
+ABES6YBI3TM4W	https://shib.univ-reims.fr/idp/shibboleth
+ABESDCVFZQ8OV	urn:mace:cru.fr:federation:univ-rennes1.fr
+ABESEZHIJDA9Z	urn:mace:cru.fr:federation:univ-rouen.fr
+ABESI3IGUJKRP	https://idp.unistra.fr/idp/shibboleth
+ABESIO16H7ELN	https://federation.utbm.fr/idp/shibboleth
+ABESI2YG7L4NA	urn:mace:cru.fr:federation:utc.fr
+ABES2DOIRE2DF	https://shibboleth3.utt.fr/idp/shibboleth
+ABESCJCKDIKG4	https://idp.univ-tln.fr/idp/shibboleth
+ABES1DT9EP6P7	https://idp.univ-tours.fr/idp/shibboleth
+ABESCECD55NG4	https://shibboleth.csi.uvsq.fr/idp/shibboleth
+ABES9XHCOF84F	https://idp.univ-antilles.fr/idp/shibboleth
+ABES8D0VN4V46	https://idp.univ-orleans.fr/idp/shibboleth
+ABESLXBGZIRA4	https://shib.univ-lehavre.fr/idp/shibboleth
+ABESIBH84X9FT	urn:mace:cru.fr:federation:univ-littoral.fr
+ABES9WN9X8EE9	https://shibboleth.univ-grenoble-alpes.fr/idp/shibboleth
+ABESEUB7NA4SI	https://idp.univ-eiffel.fr/idp/shibboleth
+ABESA1T7JY7RL	https://idp-ng.univ-st-etienne.fr/idp/shibboleth
+ABESI3FB56F7K	https://idp.univ-lyon3.fr/idp/shibboleth
+ABES9SZHAKCRD	https://idp.univ-lyon2.fr/idp/shibboleth
+ABES70BF7ZEYH	https://idp.univ-paris3.fr/idp/shibboleth
+ABESH5C8WV3OS	https://idp2.univ-paris8.fr/idp/shibboleth
+ABES90Y7NHCR4	https://auth.u-paris.fr/idp/shibboleth
+ABES5LK2FT7SY	https://idp.ent.dauphine.fr/idp/shibboleth
+ABESGRJJ3UF2Z	https://auth.u-pec.fr/idp/shibboleth
+ABES84V7YN5B7	https://upnidp2.parisnanterre.fr/idp/shibboleth
+ABESGGGI5N4SG	https://idp.universite-paris-saclay.fr/idp
+ABES9WYIJACD3	https://idp.univ-tlse3.fr/idp/shibboleth
+ABESI635XG1P6	https://idp-v4.univ-montp3.fr/idp/shibboleth
+ABES3LTYU4XL4	https://idp.uphf.fr/idp/shibboleth
+ABESF4RBHW4SY	urn:mace:cru.fr:federation:uhb.fr
+ABES3OF4BUB0Y	https://shibboleth.univ-savoie.fr/idp/shibboleth
+ABESH0B2ZCGBD	https://idp.univ-paris13.fr/idp/shibboleth
+ABES2IJ1Q7DNC	https://idp3.ut-capitole.fr/idp/shibboleth
+ABESF3PEBJ3TL	https://ruhnu.univ-tlse2.fr/idp/shibboleth
+ABESDE6W2DJ4L	https://papangue.vetagro-sup.fr/idp/shibboleth
+ABESERG2YZBDK	
+ABESKHZG6GGV3	
+ABESISYIN39H4	
+ABESGK19GYAX3	
+ABES1BW1D18GT	
+ABESION7ADI3B	
+ABES9RBGYEB3Q	
+ABES4TK3XEEVM	
+ABESIBK75C99Y	https://ciboulette.abes.fr/idp/shibboleth
+ABES7WJCBGA4A	https://idp.inha.fr/idp/shibboleth
+ABESCVAGAJ4OT	https://idp2.amue.fr/idp/shibboleth
+ABES1584HP4PA	https://idp.isara.fr/idp/shibboleth
+ABESAEA7CGBDS	
+ABES8PX4TJF7V	
+ABESCX17XO6SJ	
+ABESB52JAZ1Z2	
+ABESCIB6Y64RF	
+ABESHJTFXU4PT	
+ABES1KW8NY88T	
+ABES7WJ8VLC5O	
+ABES6X7FNIAZE	https://idp.esc-pau.fr/idp/shibboleth
+ABESHLYFIFHQ4	
+ABES8Y6G8TF3V	https://idp.chu-rouen.fr/idp/
+ABES6VS6XF800	
+ABES7DDKIQF4P	
+ABES9PQ2ZR7X2	
+ABESHG57BL1UD	
+ABES3LR5BZ2CR	
+ABESJ6MCWU2LX	
+ABESG6BJIB6HN	
+ABESEVCADYFXX	
+ABESAMYEZZIKG	
+ABES4UR8YFCLC	
+ABES1QQFTQFEE	
+ABESFGL2GS9C1	
+ABESHGSICS2IM	
+ABESEM499M6TB	
+ABES4KYHKP958	
+ABES5XXBLN6KU	
+ABES6RTUN1NE4	
+ABES8628PLAIN	
+ABES5YHHYF3LQ	
+ABES5CX2KJCIF	
+ABESG9OEPJEX6	
+ABESHO7CTI4GP	
+ABES5NQHAGB4M	
+ABES4OCTYBID7	
+ABES7XZ4KY7SH	
+ABESI9GF09VS6	
+ABES6LL2DU8FQ	
+ABES7NM7XFHTT	
+ABESDPCEM4HGA	
+ABES5SYHNO3YL	
+ABES2LY3NK8WQ	
+ABES9PV2H5CDF	
+ABESCNK3LMCZ6	
+ABESFB57KIKA2	
+ABESIACACK5KB	
+ABES5XRD15OL4	
+ABES7TWEMKACC	
+ABES5CCCWP3XN	
+ABESCDG2SNDQO	
+ABES6PO6ZPEBY	
+ABES3WY91P2YB	
+ABES3HK7YK97Y	https://idp.paris-valdeseine.archi.fr/idp/shibboleth
+ABES3CC1VO3LL	https://shibb01.ensait.fr/idp/shibboleth
+ABES5RHG349IR	https://ucopia.ensea.fr/sp
+ABES3TC2IX2IW	https://shibboleth.ensicaen.fr/idp/shibboleth
+ABES81VKFE2DI	urn:mace:cru.fr:federation:univ-paris1.fr
+ABES8TN9PBDY5	https://idp2.enssib.fr/idp/shibboleth
+ABES7PZIBKCOX	https://shibbov3.ephe.fr/idp/shibboleth
+ABESDRH2Y12TU	
+ABES4U62VTHAM	https://shibboleth.univ-paris-est.fr/idp/shibboleth
+ABESJ2U2HV7CV	
+ABES4TC2C64CJ	
+ABES8NEC8RVG4	https://idp.u-paris2.fr/idp/shibboleth
+ABES709KHX61G	https://idp.esme.fr/idp/shibboleth
+ABESD7F2LS2HW	
+ABES94X5OS525	https://sts.windows.net/0c9c1a95-0cea-4037-8239-79fddf109c3d/
+ABES8XRI3652D	
+ABES6233LU6TQ	https://sts.windows.net/e615888c-2985-4a3a-826a-7bb1842fa50e/
+ABES1QM2KBCI9	https://idpv3.ehess.fr/idp/shibboleth
+ABESCRC1V095S	https://idp.psl.eu/idp/saml2/metadata
+ABES2Q3B9GCBG	https://idp.beauxartsnantes.fr/idp/shibboleth
+ABES4UMCSBAF4	https://login.essec.fr/idp/shibboleth
+ABESIRH3ZY4SJ	
+ABESB5691C1HK	
+ABESFJU6NY3KI	
+ABESJHNEDJ4SN	
+ABES8JO3XMDFH	https://refid-auth.campus-condorcet.fr/saml/metadata/idp
+ABESF3W7K58XF	https://idp3.marnelavallee.archi.fr/idp/shibboleth
+ABESA9IDNH3UQ	https://ea-idp-01.ecole-air-espace.fr/idp/shibboleth
+ABESHZ5HV62QA	
+ABESJMFIOBGZQ	https://sts.windows.net/dffef3d7-143e-41ed-815d-9c383c48eb95/
+ABES9113YECFL	
+ABESCOO3YT8Q1	https://idp-ecoledulouvre.renater.fr/idp/shibboleth
+ABESH3BHR3H1O	https://idp.enib.fr/idp/shibboleth
+ABES4CI2HM7KB	
+ABES9A82OP9SN	https://shibboleth03.chartes.psl.eu/idp/shibboleth
+ABESEM8CZR6W4	
+ABES9W492M91O	
+ABESDES1X1JIR	https://tamana.msh-paris.fr/idp/shibboleth
+ABES5T371LDR6	
+ABES5G7HGH3Z2	https://idp.rennes.archi.fr/idp/shibboleth
+ABESHC3IO92OR	https://idp.paris-malaquais.archi.fr/idp/shibboleth
+ABES5TEEBNHBM	https://idp.st-etienne.archi.fr/idp/shibboleth
+ABES8ELIFC7WA	
+ABES4Z98DKVA4	
+ABESBGS6524OG	
+ABES6Y4HT3HEA	https://idp.enscm.fr/idp/shibboleth
+ABESCYAEWSDJN	
+ABESCHJ4C2HBX	
+ABESA6B5WHFAF	
+ABES3MT6EXCLU	
+ABES5TNB2GIJU	https://shibboleth.ens2m.fr/idp/shibboleth
+ABESHXLGJYI7B	https://idp-ensad.renater.fr/idp/shibboleth
+ABES4PD7LP71Y	
+ABESI6QJB9DNQ	
+ABES3YW9ILHFV	
+ABESBDX5TX7WU	
+ABES2JXKJD3CB	
+ABESCAZ9HC750	
+ABES9923HH7PQ	
+ABES4XIHBY91Q	
+ABESH3C2PA8PQ	
+ABESHYK7TB8OY	
+ABESC4GIDOGVF	
+ABESJNP5LX6KZ	
+ABES4LJHFAJIN	
+ABES90MCFSGGC	
+ABES7TM3BYCDP	
+ABESDRVILFVR4	https://idp.universcience.fr/idp
+ABESC9KHEP3KQ	https://federation.ined.fr/idp/shibboleth
+ABES5Y4FY8HVP	https://auth.agrosupdijon.fr/idp/shibboleth
+ABESFYV6WJB0P	
+ABES7GU9ZU9LD	
+ABES4XN9FR1MW	
+ABESG1G4RU2LH	
+ABES2GN8NQAA2	
+ABES95VHC3EMQ	
+ABES8YP1HEKBI	
+ABES28HEW3HHC	
+ABES7OT8HD5G7	
+ABESGBDFTIAWA	
+ABES7O81619TV	
+ABESH7U3WIIBR	
+ABESDNHDS9EC6	
+ABESG7NCR5B5D	
+ABESA12EXXINC	
+ABES4PIF7Y2IT	
+ABES3I3GGVFRC	https://idp.inalco.fr/idp/shibboleth
+ABES5Z94KLCPR	
+ABES9029AN4NR	
+ABESH3E2Z14F8	
+ABES6PRKERH3G	
+ABESLMEEQ9R74	
+ABES2XHDYY86Y	
+ABESFUYGNJCUF	
+ABES3KLENL70A	
+ABES3TI7OVHRS	
+ABES6XNFN8NE4	
+ABES5PLVMKAZ6	
+ABES3EM5QO8L5	
+ABESC8I1KZEU9	
+ABESC7LA1VHAK	
+ABES3K81HZKQR	
+ABES1CECJFVN4	
+ABESDVR3XHMN4	http://sts.kedgebs.com/adfs/services/trust
+ABES3JCCNVG3J	https://idp.nantes.archi.fr/idp/shibboleth
+ABESC0FZ63UW4	https://idp.versailles.archi.fr/idp/shibboleth
+ABESDIMH6P5PC	https://sts.windows.net/ea847b31-dc73-4e64-b8e9-54cb237688f3/
+ABESUY4YT4HU4	
+ABES4OQ3VB5K0	
+ABESBE12ZMFTY	
+ABES3YS5HJ99Z	https://shibboleth.grenoble.archi.fr/idp
+ABES9959N3HBO	
+ABESAEBA0Z2PY	
+ABES9XM70Z658	
+ABESBPT7OWKNM	https://sts.windows.net/0e0300d7-80a2-419f-a335-646daa467663/
+ABESHZODG2BP4	https://shibboleth.ict-toulouse.fr/idp/shibboleth
+ABESCS889C9NO	
+ABESEU95VUDPC	https://idp.curie.fr/idp/saml2/metadata
+ABESCDR9I52CC	https://idp-sciencespo-grenoble.renater.fr/idp/shibboleth
+ABESA13I5Z6L9	https://idp.sciencespobordeaux.fr/idp/shibboleth
+ABES8JADMJ29W	
+ABESBLUKADAI3	
+ABESBPO4HV3OB	
+ABES3GY8OEGGD	
+ABESKRZ5SY4PS	https://idp-irsn.renater.fr/idp/shibboleth
+ABES9WQ7RQCLY	https://idp.normandie-univ.fr/idp/shibboleth
+ABES4TE4Y17WS	
+ABES3CL4CWDR4	
+ABESIIRF3T7TM	
+ABESCEEK7GEWE	https://sts.windows.net/672488e0-d004-4859-a645-9ecd3e55bf74/
+ABESFMB2FP7PI	
+ABESHVRCPNCWX	https://idp.sciencespo-lyon.fr/idp/shibboleth
+ABESKBACPA6CD	
+ABES8CR6NNH89	https://idp.synchrotron-soleil.fr/idp/shibboleth
+ABES1GEH9CC8M	
+ABESGUE8Y1CXP	https://idpr4.imtbs-tsp.eu/idp/shibboleth
+ABESCLM4SNLP4	https://idp.u-bordeaux-montaigne.fr/idp/shibboleth
+ABES5O8GGB6G3	https://ucoshib.uco.fr/idp/shibboleth
+ABES9SY5TX4CX	https://id.ucly.fr/idp/shibboleth
+ABES3QIE84A6C	
+ABESFFP8NT99G	https://idp-feder.pleiade.education.fr/idp/
+ABES1FL90SAB7	https://idp.supagro.fr/idp
+ABESI2BIJBDVD	
+ABESGZZDECDSE	https://idp.icn-artem.com/idp
+ABESFGD2DTHTV	
+ABES1IQI3JBHT	https://idp.ens-rennes.fr/idp/shibboleth
+ABES9HA5XFGJ2	
+ABESKAL1Q31LH	
+ABES4GB70VH8R	
+ABES3RVJRUFGO	
+ABESGVW6HKIJT	https://srv-fii.insa-toulouse.fr/idp/shibboleth
+ABESEII7WSID4	
+ABES5PU2YK4QT	https://identification.univ-toulouse.fr
+ABESC4H2J2721	https://idp.centralelille.fr/idp/shibboleth
+ABES4HM3PZ1H2	https://sso-ciation-saclay.centralesupelec.fr/idp/shibboleth | https://sso-ciation-rennes.centralesupelec.fr/idp/shibboleth | https://sso-ciation-metz.centralesupelec.fr/idp/shibboleth
+ABES4D78GY2ZL	
+ABESZK7SWDSH6	
+ABES6PUFG594Q	
+ABES4PP4ULERG	
+ABES3YN2MU5CZ	
+ABES6XPCYRHNR	
+ABESG9LLM5MO4	
+ABESEUO9SM99R	
+ABES3KO2GIA3U	
+ABESF7CKE64CQ	
+ABESB9YIO4FCG	
+ABES3XP81VJ6H	
+ABESICH2R3RA5	
+ABES9EFHZ551J	
+ABESD279QBBY4	
+ABESA4IMO9XD4	https://idp4.cereq.fr/idp/shibboleth
+ABESG3D1H75CS	
+ABES3CA3OD4HA	
+ABESC9Z4C3EBQ	
+ABES8N85OU6ZV	https://idp.college-de-france.fr/idp/shibboleth
+ABESAXC2B5AHV	https://idp.lecnam.net/idp/shibboleth
+ABESJIPFZ4IAC	
+ABESCD95CVHZQ	
