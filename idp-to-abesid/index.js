@@ -42,23 +42,23 @@ module.exports = function () {
   const req = this.request;
   const logger = this.logger;
 
-  let sourceField = req.header('idp-to-abes-id-source-field');
-  let enrichedField = req.header('idp-to-abes-id-enriched-field');
+  let sourceField = req.header('idp-to-abesid-source-field');
+  let enrichedField = req.header('idp-to-abesid-enriched-field');
 
-  if (!sourceField) { sourceField = 'istex-id'; }
-  if (!enrichedField) { enrichedField = 'istex-id'; }
+  if (!sourceField) { sourceField = 'login'; }
+  if (!enrichedField) { enrichedField = 'abes-id'; }
 
-  let idps = {};
+  let idsAbes = {};
 
   const filePath = path.resolve(__dirname, 'abes_idp_2024-10.tsv');
 
   parseCSVToJSON(filePath)
     .then((jsonData) => {
-      idps = jsonData;
-      logger.info('[idp-to-abes-id]: Successfully read CSV File');
+      idsAbes = jsonData;
+      logger.info('[idp-to-abesid]: Successfully read CSV File');
     })
     .catch((err) => {
-      logger.error('[idp-to-abes-id]: Cannot read CSV File', err);
+      logger.error('[idp-to-abesid]: Cannot read CSV File', err);
       this.job._stop(err);
     });
 
@@ -66,8 +66,9 @@ module.exports = function () {
 
   function process(ec, next) {
     if (!ec || ec.auth !== 'fede' || !ec[sourceField]) { return next(); }
-    if (idps[ec[sourceField]]) {
-      ec[enrichedField] = idps[ec[sourceField]];
+
+    if (idsAbes[ec[sourceField]]) {
+      ec[enrichedField] = idsAbes[ec[sourceField]];
     }
 
     next();
