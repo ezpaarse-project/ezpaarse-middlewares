@@ -5,25 +5,22 @@ const mw = require('.');
 const process = contextify(mw);
 const { expect } = require('chai');
 
-
 const ecs = [
-  { 'istex-id': 'https://idp.lecnam.net/idp/shibboleth', auth: 'fede' },
-  { 'istex-id': 'ABESH0B2ZCGBD', auth: 'ip' },
+  { 'login': 'https://idp.lecnam.net/idp/shibboleth', auth: 'fede' },
+  { 'login': 'ABESH0B2ZCGBD', auth: 'ip' },
 ];
 
 describe('idp-to-abed-id', () => {
   it('Should not enrich with idp', async () => {
     const ec = ecs[0];
     process(ec, () => {});
-    console.log(ec);
-    expect(ec).to.have.property('istex-id', 'ABESAXC2B5AHV');
+    expect(ec).to.have.property('abes-id', 'ABESAXC2B5AHV');
   });
 
 
   it('Should enrich with idp', async () => {
     const ec = ecs[1];
     process(ec, () => {});
-    console.log(ec);
-    expect(ec).to.have.property('istex-id', 'ABESH0B2ZCGBD');
+    expect(ec).to.not.have.property('abes-id');
   });
 });
