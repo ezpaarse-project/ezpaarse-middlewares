@@ -42,32 +42,32 @@ module.exports = function () {
   const req = this.request;
   const logger = this.logger;
 
-  let sourceField = req.header('idp-to-abesid-source-field');
-  let enrichedField = req.header('idp-to-abesid-enriched-field');
-
-  if (!sourceField) { sourceField = 'login'; }
-  if (!enrichedField) { enrichedField = 'abes-id'; }
+  let sourceField = req.header('idp-to-abesid-source-field') || 'login';
+  let enrichedField = req.header('idp-to-abesid-enriched-field') || 'abes-id';
 
   let idsAbes = {};
 
   const filePath = path.resolve(__dirname, 'abes_idp_2024-10.tsv');
 
-  parseCSVToJSON(filePath)
-    .then((jsonData) => {
-      idsAbes = jsonData;
-      logger.info('[idp-to-abesid]: Successfully read CSV File');
-    })
-    .catch((err) => {
-      logger.error('[idp-to-abesid]: Cannot read CSV File', err);
-      this.job._stop(err);
-    });
-
-  return process;
+  return new Promise((resolve, reject) => {
+    parseCSVToJSON(filePath)
+      .then((jsonData) => {
+        idsAbes = jsonData;
+        logger.info('[idp-to-abesid]: Successfully read CSV File');
+        resolve(process);
+      })
+      .catch((err) => {
+        logger.error('[idp-to-abesid]: Cannot read CSV File', err);
+        this.job._stop(err);
+        reject(err);
+      });
+  });
 
   function process(ec, next) {
-    if (!ec || ec.auth !== 'fede' || !ec[sourceField]) { return next(); }
+    if (!ec || ec.auth !== 'fede' || !ec[sourceField] || ec[enrichedField]) { return next(); }
 
     if (idsAbes[ec[sourceField]]) {
+      // TODO if ec[enrichedField] is filled, not overwrite
       ec[enrichedField] = idsAbes[ec[sourceField]];
     }
 

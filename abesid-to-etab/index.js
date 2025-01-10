@@ -51,35 +51,48 @@ module.exports = function () {
   const logger = this.logger;
 
   let sourceField = req.header('abesid-to-etab-source-field');
-  let enrichedField = req.header('abesid-to-etab-enriched-field');
+  let enrichedFields = req.header('abesid-to-etab-enriched-fields');
 
   if (!sourceField) { sourceField = 'abes-id'; }
-
-  const enrichedFields = [
-    { 'Siren': 'siren' },
-    { 'Nom de l\'etablissement': 'institutionName' },
-    { 'Type de l\'etablissement': 'institutionType' },
-    { 'Adresse de l\'etablissement': 'institutionAddress' },
-    { 'Ville': 'institutionCity' },
-    { 'Telephone contact': 'institutionPhone' },
-    { 'Nom et prenom contact': 'institutionContact' },
-    { 'Adresse mail contact': 'institutionEmail' },
-    { 'IP validees': 'institutionIpRange' }
-  ]
+  if (enrichedFields) {
+    try {
+      enrichedFields = JSON.parse(enrichedFields);
+    } catch (err) {
+      const error = new Error(`[abesid-to-etab]: Cannot parse enrichedFields ${err}`);
+      error.status = 500;
+      return error;
+    }
+  } else {
+    enrichedFields = [
+      { 'Siren': 'siren' },
+      { 'Nom de l\'etablissement': 'institutionName' },
+      { 'Type de l\'etablissement': 'institutionType' },
+      { 'Adresse de l\'etablissement': 'institutionAddress' },
+      { 'Ville': 'institutionCity' },
+      { 'Telephone contact': 'institutionPhone' },
+      { 'Nom et prenom contact': 'institutionContact' },
+      { 'Adresse mail contact': 'institutionEmail' },
+      { 'IP validees': 'institutionIpRange' }
+    ]
+  }
 
   let institutions = {};
 
   const filePath = path.resolve(__dirname, 'Etablissements.csv');
 
-  parseCSVToJSON(filePath)
-    .then((jsonData) => {
-      institutions = jsonData;
-      logger.info('[abesid-to-etab]: Successfully read CSV File');
-    })
-    .catch((err) => {
-      logger.error('[abesid-to-etab]: Cannot read CSV File', err);
-      this.job._stop(err);
-    });
+  return new Promise((resolve, reject) => {
+    parseCSVToJSON(filePath)
+      .then((jsonData) => {
+        institutions = jsonData;
+        logger.info('[abesid-to-etab]: Successfully read CSV File');
+        resolve(process);
+      })
+      .catch((err) => {
+        logger.error('[abesid-to-etab]: Cannot read CSV File', err);
+        this.job._stop(err);
+        reject(err);
+      });
+  });
 
   return process;
 

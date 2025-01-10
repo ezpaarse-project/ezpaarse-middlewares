@@ -16,6 +16,31 @@ Add information about institution with abesID
 | institutionEmail | String | Contact email of institution. |
 | institutionIpRange | String | IP range of institution. |
 
+## Prerequisites
+
+idp-to-abes-id enrichment middleware needs abes-id.
+
+**You must use idp-to-abes-id after filter, parser, deduplicator middleware.**
+
+## Headers
+
++ **idp-to-abes-id-source-field** : Fields in the ec for enrichment. "abes-id" by default.
++ **idp-to-abes-id-enriched-fields** : Enriched fields in the CE.
+```json
+[
+  { "Siren": "siren" },
+  { "Nom de l'etablissement": "institutionName" },
+  { "Type de l'etablissement": "institutionType" },
+  { "Adresse de l'etablissement": "institutionAddress" },
+  { "Ville": "institutionCity" },
+  { "Telephone contact": "institutionPhone" },
+  { "Nom et prenom contact": "institutionContact" },
+  { "Adresse mail contact": "institutionEmail" },
+  { "IP validees": "institutionIpRange" }
+]
+```
+By default.
+
 ### Example
 
 ## How to use

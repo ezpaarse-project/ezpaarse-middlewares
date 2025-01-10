@@ -8,6 +8,19 @@ Add ABES ID based on IDP.
 | --- | --- | --- |
 | abes-id | String | ABES ID. |
 
+## Prerequisites
+
+## Prerequisites
+
+idp-to-abesid enrichment middleware needs idp in ec.
+
+**You must use idp-to-abesid after filter, parser, deduplicator middleware.**
+
+## Headers
+
++ **idp-to-abesid-source-field** : Fields in the ec for enrichment. "login" by default.
++ **idp-to-abesid-enriched-field** : Enriched fields in the CE. "abes-id" by default
+
 ### Example
 
 ## How to use
