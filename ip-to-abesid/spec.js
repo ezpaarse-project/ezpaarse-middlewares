@@ -12,21 +12,21 @@ const ecs = [
 
 
 describe('ip-to-abesid', () => {
-  it('ip: Should enrich with abes-id', async () => {
+  it('ip: Should enrich with "abes-id"', async () => {
     const process = await contextify(mw);
     const ec = ecs[0];
     process(ec, () => {});
     expect(ec).to.have.property('abes-id', 'ABES5SYHNO3YL');
   });
 
-  it('range ip: Should enrich with abes-id', async () => {
+  it('range ip: Should enrich with "abes-id"', async () => {
     const process = await contextify(mw);
     const ec = ecs[1];
     process(ec, () => {});
     expect(ec).to.have.property('abes-id', 'ABES1DFEJD1V1');
   });
 
-  it('range ip: Should enrich with custom-id', async () => {
+  it('range ip: Should enrich with "custom-id"', async () => {
     const process = await contextify(mw, (ctx) => {
       ctx.request.headers['ip-to-abesid-enriched-field'] = 'custom-id';
     });
@@ -35,7 +35,7 @@ describe('ip-to-abesid', () => {
     expect(ec).to.have.property('custom-id', 'ABES5SYHNO3YL');
   });
 
-  it('range ip: Should enrich with custom-id', async () => {
+  it('range ip: Should enrich with "custom-id" for custom source field "login"', async () => {
     const process = await contextify(mw, (ctx) => {
       ctx.request.headers['ip-to-abesid-source-field'] = 'login';
       ctx.request.headers['ip-to-abesid-enriched-field'] = 'custom-id';

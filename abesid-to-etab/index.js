@@ -54,9 +54,15 @@ module.exports = function () {
   let enrichedFields = req.header('abesid-to-etab-enriched-fields');
 
   if (!sourceField) { sourceField = 'abes-id'; }
+
   if (enrichedFields) {
     try {
       enrichedFields = JSON.parse(enrichedFields);
+      if (!Array.isArray(enrichedFields)) {
+        const error = new Error('[abesid-to-etab]: enrichedFields must be an array');
+        error.status = 500;
+        return error;
+      }
     } catch (err) {
       const error = new Error(`[abesid-to-etab]: Cannot parse enrichedFields ${err}`);
       error.status = 500;
