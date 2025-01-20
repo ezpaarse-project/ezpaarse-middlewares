@@ -221,18 +221,10 @@ module.exports = function () {
   function query(unitids) {
     report.inc('thesesfr-personne', 'thesesfr-queries');
 
-    const subQueries = [];
-    const ppns = [];
-
-    unitids.forEach((id) => {
-      ppns.push(id);
-    });
-
-    if (ppns.length > 0) {
-      subQueries.push(`${ppns.join(' OR ')}`);
-    }
-
-    const queryParams = `?nombre=200&q=${subQueries.join(' OR ')}`;
+    const queryParams = {
+      nombre: 200,
+      q: unitids.join(' OR '),
+    };
 
     return new Promise((resolve, reject) => {
       const options = {
@@ -241,7 +233,8 @@ module.exports = function () {
         headers: {
           'User-Agent': userAgent,
         },
-        uri: `${baseUrl}${queryParams}`,
+        uri: baseUrl,
+        qs: queryParams,
       };
 
       request(options, (err, response, result) => {

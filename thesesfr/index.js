@@ -536,7 +536,10 @@ module.exports = function () {
 
     const uniques = new Set(nnts.concat(numSujets));
 
-    const queryParams = `?nombre=200&q=${subQueries.join(' OR ')}`;
+    const queryParams = {
+      nombre: 200,
+      q: subQueries.join(' OR '),
+    };
 
     return new Promise((resolve, reject) => {
       const options = {
@@ -545,7 +548,8 @@ module.exports = function () {
         headers: {
           'User-Agent': userAgent,
         },
-        uri: `${baseUrl}${queryParams}`,
+        uri: baseUrl,
+        qs: queryParams,
       };
 
       const pseudoResponse = new Set();
