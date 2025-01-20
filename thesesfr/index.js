@@ -69,8 +69,8 @@ module.exports = function () {
       if (!ec.unitid) {
         return false;
       }
-      // no need to us cache if the EC is not a thesis/thesis record
-      if (!(ec.rtype === 'PHD_THESIS') || (ec.rtype === 'ABS')) {
+      // Only enrich thesis and thesis record
+      if (ec.rtype !== 'PHD_THESIS' && ec.rtype !== 'ABS') {
         return false;
       }
       if (!cacheEnabled) {
@@ -78,16 +78,18 @@ module.exports = function () {
       }
 
       return findInCache(ec.unitid).then((cachedDoc) => {
-        if (cachedDoc) {
-          if (Object.keys(cachedDoc).length === 0) {
-            logger.debug(`[thesesfr]: unitid: [${ec.unitid}] for rtype: [${ec.rtype}] is not in cache`);
-          } else {
-            logger.debug(`[thesesfr]: unitid: [${ec.unitid}] for rtype: [${ec.rtype}] is in cache`);
-            enrichEc(ec, cachedDoc);
-          }
-          return false;
+        if (!cachedDoc) {
+          return true;
         }
-        return true;
+
+        if (Object.keys(cachedDoc).length === 0) {
+          logger.debug(`[thesesfr]: unitid: [${ec.unitid}] for rtype: [${ec.rtype}] is not in cache`);
+        } else {
+          logger.debug(`[thesesfr]: unitid: [${ec.unitid}] for rtype: [${ec.rtype}] is in cache`);
+          enrichEc(ec, cachedDoc);
+        }
+
+        return false;
       });
     },
 
@@ -228,41 +230,43 @@ module.exports = function () {
    * @param {Object} ec the EC to be enriched
    */
   function enrichForgedEc(ec) {
+    const notFoundLabel = 'NOT_FOUND';
+
     ec.rtype = 'OTHER';
-    ec.nnt = 'NOT_FOUND';
-    ec.numSujet = 'NOT_FOUND';
-    ec.etabSoutenanceN = 'NOT_FOUND';
-    ec.etabSoutenancePpn = 'NOT_FOUND';
-    ec.codeCourt = 'NOT_FOUND';
-    ec.dateSoutenance = 'NOT_FOUND';
-    ec.anneeSoutenance = 'NOT_FOUND';
-    ec.dateInscription = 'NOT_FOUND';
-    ec.anneeInscription = 'NOT_FOUND';
-    ec.statut = 'NOT_FOUND';
-    ec.discipline = 'NOT_FOUND';
-    ec.ecoleDoctoraleN = 'NOT_FOUND';
-    ec.ecoleDoctoralePpn = 'NOT_FOUND';
-    ec.partenaireRechercheN = 'NOT_FOUND';
-    ec.partenaireRecherchePpn = 'NOT_FOUND';
-    ec.auteurN = 'NOT_FOUND';
-    ec.auteurPpn = 'NOT_FOUND';
-    ec.directeurN = 'NOT_FOUND';
-    ec.directeurPpn = 'NOT_FOUND';
-    ec.presidentN = 'NOT_FOUND';
-    ec.presidentPpn = 'NOT_FOUND';
-    ec.rapporteursN = 'NOT_FOUND';
-    ec.rapporteursPpn = 'NOT_FOUND';
-    ec.membresN = 'NOT_FOUND';
-    ec.membresPpn = 'NOT_FOUND';
-    ec.personneN = 'NOT_FOUND';
-    ec.personnePpn = 'NOT_FOUND';
-    ec.organismeN = 'NOT_FOUND';
-    ec.organismePpn = 'NOT_FOUND';
-    ec.idp_etab_nom = 'NOT_FOUND';
-    ec.idp_etab_ppn = 'NOT_FOUND';
-    ec.idp_etab_code_court = 'NOT_FOUND';
-    ec.platform_name = 'NOT_FOUND';
-    ec.publication_title = 'NOT_FOUND';
+    ec.nnt = notFoundLabel;
+    ec.numSujet = notFoundLabel;
+    ec.etabSoutenanceN = notFoundLabel;
+    ec.etabSoutenancePpn = notFoundLabel;
+    ec.codeCourt = notFoundLabel;
+    ec.dateSoutenance = notFoundLabel;
+    ec.anneeSoutenance = notFoundLabel;
+    ec.dateInscription = notFoundLabel;
+    ec.anneeInscription = notFoundLabel;
+    ec.statut = notFoundLabel;
+    ec.discipline = notFoundLabel;
+    ec.ecoleDoctoraleN = notFoundLabel;
+    ec.ecoleDoctoralePpn = notFoundLabel;
+    ec.partenaireRechercheN = notFoundLabel;
+    ec.partenaireRecherchePpn = notFoundLabel;
+    ec.auteurN = notFoundLabel;
+    ec.auteurPpn = notFoundLabel;
+    ec.directeurN = notFoundLabel;
+    ec.directeurPpn = notFoundLabel;
+    ec.presidentN = notFoundLabel;
+    ec.presidentPpn = notFoundLabel;
+    ec.rapporteursN = notFoundLabel;
+    ec.rapporteursPpn = notFoundLabel;
+    ec.membresN = notFoundLabel;
+    ec.membresPpn = notFoundLabel;
+    ec.personneN = notFoundLabel;
+    ec.personnePpn = notFoundLabel;
+    ec.organismeN = notFoundLabel;
+    ec.organismePpn = notFoundLabel;
+    ec.idp_etab_nom = notFoundLabel;
+    ec.idp_etab_ppn = notFoundLabel;
+    ec.idp_etab_code_court = notFoundLabel;
+    ec.platform_name = notFoundLabel;
+    ec.publication_title = notFoundLabel;
   }
 
   /**
@@ -306,17 +310,17 @@ module.exports = function () {
       ec.partenaireRecherchePpn = 'NR';
     } else {
       ec.partenaireRechercheN = result.partenairesDeRecherche.map((elt) => {
-        if (elt.nom === null || elt.nom === '') {
-          return 'NR';
+        if (typeof elt.nom === 'string' && elt.nom.length > 0) {
+          return elt.nom
         }
-        return elt.nom;
+        return 'NR';
       }).join(' / ');
 
       ec.partenaireRecherchePpn = result.partenairesDeRecherche.map((elt) => {
-        if (elt.ppn === null || elt.ppn === '') {
-          return 'NR';
+        if (typeof elt.ppn === 'string' && elt.ppn.length > 0) {
+          return elt.ppn;
         }
-        return elt.ppn;
+        return 'NR';
       }).join(' / ');
     }
 
