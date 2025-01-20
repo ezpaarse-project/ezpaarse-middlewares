@@ -139,7 +139,6 @@ module.exports = function () {
           logger.error(`[thesesfr-organisme]: Cannot request thesesfr-organisme : ${e.message}`);
         }
 
-        yield wait(throttle);
         yield wait(tries === 0 ? throttle : baseWaitTime * 2 ** tries);
       }
 

@@ -121,7 +121,6 @@ module.exports = function () {
         logger.error(`Thesesfr: ${e.message}`);
       }
 
-      yield wait(throttle);
       yield wait(tries === 0 ? throttle : baseWaitTime * 2 ** tries);
     }
 
