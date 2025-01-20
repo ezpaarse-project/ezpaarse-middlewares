@@ -195,7 +195,6 @@ module.exports = function () {
         logger.error(`[thesesfr]: Cannot request thesesfr ${e.message}`);
       }
 
-      yield wait(throttle);
       yield wait(tries === 0 ? throttle : baseWaitTime * 2 ** tries);
     }
 
