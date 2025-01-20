@@ -103,7 +103,7 @@ module.exports = function () {
   function* onPacket({ ecs }) {
     if (ecs.length === 0) { return; }
 
-    const unitids = ecs.filter(([ec]) => ec.rtype === 'RECORD').map(([ec]) => ec.unitid);
+    const unitids = ecs.map(([ec]) => ec.unitid);
 
     let tries = 0;
     let docs;
