@@ -61,21 +61,22 @@ module.exports = function () {
       */
     filter: (ec) => {
       if (!ec.unitid) { return false; }
-      // no need to us cache if the EC is not a thesis record
-      if (!(ec.rtype === 'RECORD')) { return false; }
+      if (ec.rtype !== 'RECORD') { return false; } // Only enrich thesis records
       if (!cacheEnabled) { return true; }
 
       return findInCache(ec.unitid).then((cachedDoc) => {
-        if (cachedDoc) {
-          if (Object.keys(cachedDoc).length === 0) {
-            logger.warn(`[thesefr-organisme]: missed cache, doc from thesesfr-organisme is empty for unitid: [${ec.unitid}] rtype: ${ec.rtype}`);
-          } else {
-            logger.debug(`[thesefr-organisme]: unitid: [${ec.unitid}] rtype :[${ec.rtype}] come from cache`);
-            enrichEc(ec, cachedDoc);
-          }
-          return false;
+        if (!cachedDoc) {
+          return true;
         }
-        return true;
+
+        if (Object.keys(cachedDoc).length === 0) {
+          logger.warn(`[thesefr-organisme]: missed cache, doc from thesesfr-organisme is empty for unitid: [${ec.unitid}] rtype: ${ec.rtype}`);
+        } else {
+          logger.debug(`[thesefr-organisme]: unitid: [${ec.unitid}] rtype :[${ec.rtype}] come from cache`);
+          enrichEc(ec, cachedDoc);
+        }
+
+        return false;
       });
     },
 
@@ -158,54 +159,58 @@ module.exports = function () {
    */
   function enrichEc(ec, result) {
     // il s'agit d'une Personne (PPN)
-    if (result.nom && result.prenom) {
-      ec.personneN = `${result.nom} ${result.prenom}`;
-      ec.personnePpn = ec.unitid;
-      // update rtype to BIO to ignore it for the next middleware
-      ec.rtype = 'BIO';
-      ec.nnt = 'sans objet';
-      ec.numSujet = 'sans objet';
-      // TODO doiThese > sans objet > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
-      // ec.doiThese = 'sans objet';
-      ec.etabSoutenanceN = 'sans objet';
-      ec.etabSoutenancePpn = 'sans objet';
-      ec.codeCourt = 'sans objet';
-      ec.dateSoutenance = 'sans objet';
-      ec.anneeSoutenance = 'sans objet';
-      ec.dateInscription = 'sans objet';
-      ec.anneeInscription = 'sans objet';
-      ec.statut = 'sans objet';
-      // TODO accessible > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
-      // ec.accessible = 'sans objet';
-      // TODO source > sans objet > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
-      // ec.source = 'sans objet';
-      ec.discipline = 'sans objet';
-      // TODO domaine > obligatoire  > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
-      // ec.domaine = 'sans objet';
-      // TODO langue > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
-      // ec['langue'] = 'sans objet';
-      ec.ecoleDoctoraleN = 'sans objet';
-      ec.ecoleDoctoralePpn = 'sans objet';
-      ec.partenaireRechercheN = 'sans objet';
-      ec.partenaireRecherchePpn = 'sans objet';
-      // TODO coTutelleN, coTutellePpn > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
-      ec.auteurN = 'sans objet';
-      ec.auteurPpn = 'sans objet';
-      ec.directeurN = 'sans objet';
-      ec.directeurPpn = 'sans objet';
-      ec.presidentN = 'sans objet';
-      ec.presidentPpn = 'sans objet';
-      ec.rapporteursN = 'sans objet';
-      ec.rapporteursPpn = 'sans objet';
-      ec.membresN = 'sans objet';
-      ec.membresPpn = 'sans objet';
-      ec.organismeN = 'sans objet';
-      ec.organismePpn = 'sans objet';
-      ec.idp_etab_nom = 'sans objet';
-      ec.idp_etab_ppn = 'sans objet';
-      ec.idp_etab_code_court = 'sans objet';
-      ec.platform_name = 'Personne';
+    if (!result.nom || !result.prenom) {
+      return;
     }
+
+    ec.personneN = `${result.nom} ${result.prenom}`;
+    ec.personnePpn = ec.unitid;
+    ec.rtype = 'BIO'; // update rtype to BIO to ignore it for the next middleware
+    ec.platform_name = 'Personne';
+
+    const emptyLabel = 'sans objet';
+
+    ec.nnt = emptyLabel;
+    ec.numSujet = emptyLabel;
+    // TODO doiThese > sans objet > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
+    // ec.doiThese = emptyLabel;
+    ec.etabSoutenanceN = emptyLabel;
+    ec.etabSoutenancePpn = emptyLabel;
+    ec.codeCourt = emptyLabel;
+    ec.dateSoutenance = emptyLabel;
+    ec.anneeSoutenance = emptyLabel;
+    ec.dateInscription = emptyLabel;
+    ec.anneeInscription = emptyLabel;
+    ec.statut = emptyLabel;
+    // TODO accessible > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
+    // ec.accessible = emptyLabel;
+    // TODO source > sans objet > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
+    // ec.source = emptyLabel;
+    ec.discipline = emptyLabel;
+    // TODO domaine > obligatoire  > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
+    // ec.domaine = emptyLabel;
+    // TODO langue > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
+    // ec['langue'] = emptyLabel;
+    ec.ecoleDoctoraleN = emptyLabel;
+    ec.ecoleDoctoralePpn = emptyLabel;
+    ec.partenaireRechercheN = emptyLabel;
+    ec.partenaireRecherchePpn = emptyLabel;
+    // TODO coTutelleN, coTutellePpn > à masquer tant que non présent dans l'API theses > supprimé provisoirement du header (champs pour la sortie)
+    ec.auteurN = emptyLabel;
+    ec.auteurPpn = emptyLabel;
+    ec.directeurN = emptyLabel;
+    ec.directeurPpn = emptyLabel;
+    ec.presidentN = emptyLabel;
+    ec.presidentPpn = emptyLabel;
+    ec.rapporteursN = emptyLabel;
+    ec.rapporteursPpn = emptyLabel;
+    ec.membresN = emptyLabel;
+    ec.membresPpn = emptyLabel;
+    ec.organismeN = emptyLabel;
+    ec.organismePpn = emptyLabel;
+    ec.idp_etab_nom = emptyLabel;
+    ec.idp_etab_ppn = emptyLabel;
+    ec.idp_etab_code_court = emptyLabel;
   }
 
   /**
