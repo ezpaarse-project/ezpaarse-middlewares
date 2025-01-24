@@ -1,0 +1,6 @@
+{
+  "headers": [
+    { "name": "idp-to-abesid-source-field" },
+    { "name": "idp-to-abesid-enriched-field" }
+  ]
+}
