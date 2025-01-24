@@ -67,7 +67,6 @@ module.exports = function () {
     if (!ec || ec.auth !== 'fede' || !ec[sourceField] || ec[enrichedField]) { return next(); }
 
     if (idsAbes[ec[sourceField]]) {
-      // TODO if ec[enrichedField] is filled, not overwrite
       ec[enrichedField] = idsAbes[ec[sourceField]];
     }
 
