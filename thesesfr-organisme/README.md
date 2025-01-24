@@ -1,6 +1,7 @@
 # thesesfr-organisme
 
-Fetches thesesfr-organisme API from ABES
+Fetches thesesfr-organisme API from ABES.
+This middleware is used only for log from these.fr.
 
 ## Enriched fields
 
@@ -52,7 +53,7 @@ Fetches thesesfr-organisme API from ABES
 
 ## Recommendation
 
-// TODO
+This middleware should be used after thesesfr and thesesfr-organisme.
 
 ## Headers
 
