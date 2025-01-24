@@ -1,0 +1,6 @@
+{
+  "headers": [
+    { "name": "abesid-to-etab-source-field" },
+    { "name": "abesid-to-etab-enriched-field" }
+  ]
+}
