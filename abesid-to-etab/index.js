@@ -50,36 +50,30 @@ module.exports = function () {
   const req = this.request;
   const logger = this.logger;
 
-  let sourceField = req.header('abesid-to-etab-source-field');
+  const sourceField = req.header('abesid-to-etab-source-field') || 'abes-id';
   let enrichedFields = req.header('abesid-to-etab-enriched-fields');
 
-  if (!sourceField) { sourceField = 'abes-id'; }
 
   if (enrichedFields) {
     try {
       enrichedFields = JSON.parse(enrichedFields);
-      if (!Array.isArray(enrichedFields)) {
-        const error = new Error('[abesid-to-etab]: enrichedFields must be an array');
-        error.status = 500;
-        return error;
-      }
     } catch (err) {
       const error = new Error(`[abesid-to-etab]: Cannot parse enrichedFields ${err}`);
       error.status = 500;
       return error;
     }
   } else {
-    enrichedFields = [
-      { 'Siren': 'siren' },
-      { 'Nom de l\'etablissement': 'institutionName' },
-      { 'Type de l\'etablissement': 'institutionType' },
-      { 'Adresse de l\'etablissement': 'institutionAddress' },
-      { 'Ville': 'institutionCity' },
-      { 'Telephone contact': 'institutionPhone' },
-      { 'Nom et prenom contact': 'institutionContact' },
-      { 'Adresse mail contact': 'institutionEmail' },
-      { 'IP validees': 'institutionIpRange' }
-    ]
+    enrichedFields = {
+      'Siren': 'siren',
+      'Nom de l\'etablissement': 'institutionName',
+      'Type de l\'etablissement': 'institutionType',
+      'Adresse de l\'etablissement': 'institutionAddress',
+      'Ville': 'institutionCity',
+      'Telephone contact': 'institutionPhone',
+      'Nom et prenom contact': 'institutionContact',
+      'Adresse mail contact': 'institutionEmail',
+      'IP validees': 'institutionIpRange'
+    }
   }
 
   let institutions = {};
@@ -100,19 +94,18 @@ module.exports = function () {
       });
   });
 
-  return process;
-
   function process(ec, next) {
     if (!ec || !ec[sourceField]) { return next(); }
 
     if (institutions[ec[sourceField]]) {
       const dataFromCSV = institutions[ec[sourceField]];
-  
-      enrichedFields.forEach((enrichedField) => {
-        const keyFromCSV = Object.keys(enrichedField)[0];
-        const enrichedKey = Object.values(enrichedField)[0];
+
+      Object.entries(enrichedFields).forEach(([keyFromCSV, enrichedKey]) => {
+        if (ec[enrichedKey]) {
+          return;
+        }
         ec[enrichedKey] = dataFromCSV[keyFromCSV];
-      })
+      });
     }
 
     next();
