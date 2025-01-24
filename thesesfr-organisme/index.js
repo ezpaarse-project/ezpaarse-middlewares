@@ -20,7 +20,7 @@ module.exports = function () {
   // Minimum wait time before each request (in ms)
   let throttle = parseInt(req.header('thesesfr-organisme-throttle'), 10);
   // Base wait time after a request fails
-  let baseWaitTime = parseInt(req.header('thesesfr-base-wait-time'), 10);
+  let baseWaitTime = parseInt(req.header('thesesfr-organisme-base-wait-time'), 10);
   // Maximum number of Theses or Persons to query
   let packetSize = parseInt(req.header('thesesfr-organisme-packet-size'), 10);
   // Minimum number of ECs to keep before resolving them
