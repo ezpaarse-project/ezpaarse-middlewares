@@ -5,9 +5,9 @@ const mw = require('.');
 const { expect } = require('chai');
 
 const ecs = [
-  { ip: '95.138.124.9' },
-  { ip: '140.77.15.50' },
-  { login: '95.138.124.9' },
+  { ip: '95.138.124.9' }, // simple ip
+  { ip: '140.77.15.50' }, // in range ip
+  { login: '95.138.124.9' }, // simple ip
 ];
 
 
@@ -19,6 +19,7 @@ describe('ip-to-abesid', () => {
     expect(ec).to.have.property('abes-id', 'ABES5SYHNO3YL');
   });
 
+  // range: 140.77.168-255.0-255, 140.77.0-50.0-255, 140.77.52-165.0-255
   it('range ip: Should enrich with "abes-id"', async () => {
     const process = await contextify(mw);
     const ec = ecs[1];
