@@ -1,6 +1,7 @@
 # thesesfr-personne
 
-Fetches thesesfr-personne API from ABES
+Fetches thesesfr-personne API from ABES.
+This middleware is used only for log from these.fr.
 
 ## Enriched fields
 
@@ -49,11 +50,13 @@ Fetches thesesfr-personne API from ABES
 
 ## Prerequisites
 
+Ec needs unitid and rtype equal to RECORD.
+
 **You must use thesesfr-personne after filter, parser, deduplicator middleware.**
 
 ## Recommendation
 
-// TODO
+This middleware should be used after thesesfr and before thesesfr-organisme.
 
 ## Headers
 
