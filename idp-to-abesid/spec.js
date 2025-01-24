@@ -7,7 +7,7 @@ const { expect } = require('chai');
 const ecs = [
   { 'login': 'https://idp.lecnam.net/idp/shibboleth', auth: 'fede' },
   { 'login': 'ABESH0B2ZCGBD', auth: 'ip' },
-  { 'idp': 'https://idp.lecnam.net/idp/shibboleth', auth: 'fede' },
+  { 'idp': 'https://idp.lecnam.net/idp/shibboleth', auth: 'ip' },
 ];
 
 describe('idp-to-abed-id', () => {
@@ -43,5 +43,12 @@ describe('idp-to-abed-id', () => {
     const ec = ecs[0];
     process(ec, () => {});
     expect(ec).to.have.property('custom-id', 'ABESAXC2B5AHV');
+  });
+
+  it('Should not enrich "abes-id" with idp because ec is not fede', async () => {
+    const process = await contextify(mw);
+    const ec = ecs[2];
+    process(ec, () => {});
+    expect(ec).to.not.have.property('abes-id');
   });
 });
