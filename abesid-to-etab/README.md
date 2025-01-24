@@ -1,4 +1,4 @@
-# idp-to-abes-id
+# abesid-to-etab
 
 Add information about institution with abesID
 
