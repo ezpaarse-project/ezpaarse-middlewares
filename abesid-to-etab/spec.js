@@ -48,7 +48,7 @@ describe('abesid-to-etab', () => {
   it('Should enrich "custom id" with "login" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
       ctx.request.headers['abesid-to-etab-source-field'] = 'login';
-      ctx.request.headers['abesid-to-etab-enriched-fields'] = '[{ "Siren": "custom-id" }]';
+      ctx.request.headers['abesid-to-etab-enriched-fields'] = '{ "Siren": "custom-id" }';
     });
     const ec = ecs[1];
     process(ec, () => {});

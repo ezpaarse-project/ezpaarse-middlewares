@@ -27,19 +27,21 @@ idp-to-abes-id enrichment middleware needs abes-id.
 + **idp-to-abes-id-source-field** : Fields in the ec for enrichment. "abes-id" by default.
 + **idp-to-abes-id-enriched-fields** : Enriched fields in the CE.
 ```json
-[
-  { "Siren": "siren" },
-  { "Nom de l'etablissement": "institutionName" },
-  { "Type de l'etablissement": "institutionType" },
-  { "Adresse de l'etablissement": "institutionAddress" },
-  { "Ville": "institutionCity" },
-  { "Telephone contact": "institutionPhone" },
-  { "Nom et prenom contact": "institutionContact" },
-  { "Adresse mail contact": "institutionEmail" },
-  { "IP validees": "institutionIpRange" }
-]
+{
+  "Siren": "siren",
+  "Nom de l'etablissement": "institutionName",
+  "Type de l'etablissement": "institutionType",
+  "Adresse de l'etablissement": "institutionAddress",
+  "Ville": "institutionCity",
+  "Telephone contact": "institutionPhone",
+  "Nom et prenom contact": "institutionContact",
+  "Adresse mail contact": "institutionEmail",
+  "IP validees": "institutionIpRange"
+}
 ```
 By default.
+Example : "<Field in csv file>": "<Field in EC>"
+Is not recommended to update field in csv file.
 
 ### Example
 
