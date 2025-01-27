@@ -1,0 +1,12 @@
+{
+  "headers": [
+    { "name": "thesesfr-organisme-ttl" },
+    { "name": "thesesfr-organisme-throttle" },
+    { "name": "thesesfr-organisme-max-tries" },
+    { "name": "thesesfr-organisme-base-wait-time" },
+    { "name": "thesesfr-organisme-packet-size" },
+    { "name": "thesesfr-organisme-buffer-size" },
+    { "name": "thesesfr-organisme-max-attempts" },
+    { "name": "thesesfr-organisme-user-agent" }
+  ]
+}

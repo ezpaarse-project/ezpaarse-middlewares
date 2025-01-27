@@ -1,0 +1,12 @@
+{
+  "headers": [
+    { "name": "thesesfr-ttl" },
+    { "name": "thesesfr-throttle" },
+    { "name": "thesesfr-max-tries" },
+    { "name": "thesesfr-base-wait-time" },
+    { "name": "thesesfr-packet-size" },
+    { "name": "thesesfr-buffer-size" },
+    { "name": "thesesfr-max-attempts" },
+    { "name": "thesesfr-user-agent" }
+  ]
+}

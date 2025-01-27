@@ -1,4 +1,4 @@
-# idp-to-abes-id
+# abesid-to-etab
 
 Add information about institution with abesID
 
@@ -7,7 +7,7 @@ Add information about institution with abesID
 | Name | Type | Description |
 | --- | --- | --- |
 | siren | String | IDP. |
-| institutionName | String | IDP. |
+| institutionName | String | Name of institution. |
 | institutionType | String | Type of institution. |
 | institutionAddress | String | Postal address of institution. |
 | institutionCity | String | City of institution. |
