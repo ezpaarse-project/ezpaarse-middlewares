@@ -5,48 +5,48 @@ This middleware is used only for log from these.fr.
 
 ## Enriched fields
 
-| Name | Type | Description |
-| --- | --- | --- |
-| rtype | String | |
-| nnt | | |
-| numSujet | String | |
-| etabSoutenanceN | String | |
-| etabSoutenancePpn | String | |
-| codeCourt | String | |
-| dateSoutenance | String | |
-| anneeSoutenance | String | |
-| dateInscription | String | |
-| anneeInscription | String | |
-| statut | String | |
-| discipline | String | |
-| ecoleDoctoraleN | String | |
-| ecoleDoctoralePpn | String | |
-| partenaireRechercheN | String | |
-| partenaireRecherchePpn | String | |
-| auteurN | String | |
-| auteurPpn | String | |
-| directeurN | String | |
-| directeurPpn | String | |
-| presidentN | String | |
-| presidentPpn | String | |
-| rapporteursN | String | |
-| rapporteursPpn | String | |
-| membresN | String | |
-| membresPpn | String | |
-| personneN | String | |
-| personnePpn | String | |
-| organismeN | String | |
-| organismePpn | String | |
-| idp_etab_nom | String | |
-| idp_etab_ppn | String | |
-| idp_etab_code_court | String | |
-| platform_name | String | |
-| publication_title | String | |
-| source | String | Coming soon |
-| domaine | String | Coming soon |
-| doiThese | String | Coming soon |
-| accessible | String | Coming soon | 
-| langue | String | Coming soon | 
+| Name | Type   | Description |
+| --- |--------| --- |
+| rtype | String | type de consultation (ABS = notice de thèse vue ; PDF_THESIS = fichier de thèse téléchargé ; BIO = notice de personne vue ; ORGANISME = notice d'organisme vue) |
+| nnt | String | Numéro National de Thèse |
+| numSujet | String | identifiant de la thèse en préparation dans la base STEP |
+| etabSoutenanceN | String | nom de l'établissement de soutenance de la thèse |
+| etabSoutenancePpn | String | identifiant (PPN) de l'établissement de soutenance de la thèse |
+| codeCourt | String | code court de l'établissement de soutenance de la thèse |
+| dateSoutenance | String | date de soutenance de la thèse |
+| anneeSoutenance | String | année de soutenance de la thèse |
+| dateInscription | String | date d'inscription en doctorat |
+| anneeInscription | String | année d'inscription en doctorat |
+| statut | String | statut de la thèse : soutenue ou en préparation |
+| discipline | String | discipline de la thèse |
+| ecoleDoctoraleN | String | nom de l'école doctorale liée à la thèse |
+| ecoleDoctoralePpn | String | identifiant (PPN) de l'école doctorale liée à la thèse |
+| partenaireRechercheN | String | nom du partenaire de recherche (laboratoire, entreprise, équipe de recherche, fondation, etc) |
+| partenaireRecherchePpn | String | identifiant (PPN) du partenaire de recherche (laboratoire, entreprise, équipe de recherche, fondation, etc) |
+| auteurN | String | nom de l'auteur de la tèse |
+| auteurPpn | String | identifiant (PPN) de l'auteur de la thèse |
+| directeurN | String | nom du directeur de thèse |
+| directeurPpn | String | identifiant (PPN) du directeur de thèse |
+| presidentN | String | nom du président du jury |
+| presidentPpn | String | identifiant (PPN) du président du jury |
+| rapporteursN | String | nom des rapporteurs |
+| rapporteursPpn | String | identifiant (PPN) des rapporteurs |
+| membresN | String | nom des membres du jury |
+| membresPpn | String | identifiant (PPN) des membres du jury |
+| personneN | String | nom de la personne quel que soit son rôle (auteur, directeur, membre du jury, rapporteur, président du jury, etc) |
+| personnePpn | String | identifiant (PPN) de la personne quel que soit son rôle (auteur, directeur, membre du jury, rapporteur, président du jury, etc) |
+| organismeN | String | nom de l'organisme quel que soit son rôle (établissement de soutenance, école doctorale, partenaire de recherche, etc) |
+| organismePpn | String | identifiant (PPN) de l'organisme quel que soit son rôle (établissement de soutenance, école doctorale, partenaire de recherche, etc) |
+| idp_etab_nom | String | dans les logs Apache : nom de l'établissement de rattachement de l'utilisateur (quand connexion via Renater) |
+| idp_etab_ppn | String | dans les logs Apache : identifiant (PPN) de l'établissement de rattachement de l'utilisateur (quand connexion via Renater) |
+| idp_etab_code_court | String | dans les logs Apache : code court de l'établissement de rattachement de l'utilisateur (quand connexion via Renater) |
+| platform_name | String | nom long de la plateforme d'hébergement de la ressource : theses.fr |
+| publication_title | String | titre de la ressource |
+| source | String | source des données : STEP, STAR, Sudoc |
+| domaine | String | domaine thématique associé à la thèse |
+| doiThese | String | DOI attribué à la thèse |
+| accessible | String | thèse accessible en ligne : oui ou non | 
+| langue | String | langue de rédaction de la thèse | 
 
 ## Prerequisites
 
