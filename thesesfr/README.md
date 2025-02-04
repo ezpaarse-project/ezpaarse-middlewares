@@ -52,9 +52,9 @@ This middleware is used only for log from theses.fr.
 
 Ec needs unitid and rtype equal to PHD_THESIS or ABS.
 
-**You must use thesesfr after filter, parser, deduplicator middleware.  
+**You must use thesesfr after filter, parser, deduplicator middleware.**  
 
-You must use the 3 middlewares at once, in this order : thesesfr, thesesfr-personne, thesesfr-organisme**  
+**You must use the 3 middlewares at once, in this order : thesesfr, thesesfr-personne, thesesfr-organisme**  
 ``` -H "ezPAARSE-Middlewares: thesesfr,thesesfr-personne,thesesfr-organisme" ```
 
 ## Headers
