@@ -305,7 +305,7 @@ module.exports = function () {
     if (result.discipline) { ec.discipline = result.discipline; }
 
     // partenairesDeRecherche > répétable > nom + prenom facultatif / ppn facultatif
-    if (result.partenairesDeRecherche === null || result.partenairesDeRecherche === '') {
+    if (!result.partenairesDeRecherche || result.partenairesDeRecherche.length === 0) {
       ec.partenaireRechercheN = 'NR';
       ec.partenaireRecherchePpn = 'NR';
     } else {
@@ -355,7 +355,7 @@ module.exports = function () {
       ec.presidentPpn = 'NR';
     }
 
-    if (!result.rapporteurs) {
+    if (!result.rapporteurs || result.rapporteurs.length === 0) {
       ec.rapporteursN = 'NR';
       ec.rapporteursPpn = 'NR';
     } else {
@@ -368,7 +368,7 @@ module.exports = function () {
         .join(' / ');
     }
 
-    if (!result.examinateurs) {
+    if (!result.examinateurs || result.examinateurs.length === 0) {
       ec.membresN = 'NR';
       ec.membresPpn = 'NR';
     } else {
@@ -486,7 +486,7 @@ module.exports = function () {
       //   ec.langue = 'NR';
       // }
 
-      if (!result.ecolesDoctorale) {
+      if (!result.ecolesDoctorale || result.ecolesDoctorale.length === 0) {
         ec.ecoleDoctoraleN = 'NR';
         ec.ecoleDoctoralePpn = 'NR';
       } else {
