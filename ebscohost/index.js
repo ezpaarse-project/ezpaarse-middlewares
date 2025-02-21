@@ -32,7 +32,8 @@ module.exports = function () {
   });
 
   function process(ec, next) {
-    if (!ec || ec.platform !== 'ebscohost') { return next(); }
+    if (!ec) { return next(); }
+    if (ec.platform !== 'ebscohost' && ec.platform !== 'ebsco25') { return next(); }
 
     if (ec.db_id && list[ec.db_id.toUpperCase()]) {
       ec['db_title'] = list[ec.db_id.toUpperCase()];
