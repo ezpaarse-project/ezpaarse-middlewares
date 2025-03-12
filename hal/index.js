@@ -19,26 +19,32 @@ try {
 * Enrich ECs with hal data
 */
 module.exports = function () {
-  const self         = this;
-  const report       = this.report;
-  const req          = this.request;
-  const activated    = (methal !== null) && /^true$/i.test(req.header('hal-enrich'));
+  const self = this;
+  const report = this.report;
+  const req = this.request;
+  const activated    = !/^false$/i.test(req.header('hal-enrich'));
   const cacheEnabled = !/^false$/i.test(req.header('hal-cache'));
 
   if (!activated) { return function (ec, next) { next(); }; }
 
   self.logger.verbose('hal cache: %s', cacheEnabled ? 'enabled' : 'disabled');
 
-  const ttl         = parseInt(req.header('hal-ttl')) || 3600 * 24 * 7;
-  const throttle    = parseInt(req.header('hal-throttle')) || 100;
-  const packetSize  = parseInt(req.header('hal-paquet-size')) || 150;
-  const maxAttempts = 5;
+  // Time-to-live of cached documents
+  let ttl = parseInt(req.header('hal-ttl'));
+  // Minimum wait time before each request (in ms)
+  let throttle = parseInt(req.header('hal-throttle'));
+  // Maximum number of ID to query
+  let packetSize = parseInt(req.header('hal-paquet-size'));
   // Minimum number of ECs to keep before resolving them
-  let bufferSize    = parseInt(req.header('hal-buffer-size'));
+  let bufferSize = parseInt(req.header('hal-buffer-size'));
+  // Maximum number of trials before passing the EC in error
+  let maxAttempts = parseInt(req.header('hal-max-attempts'));
 
-  if (isNaN(bufferSize)) {
-    bufferSize = 1000;
-  }
+  if (isNaN(packetSize)) { packetSize = 150; }
+  if (isNaN(bufferSize)) { bufferSize = 1000; }
+  if (isNaN(throttle)) { throttle = 100; }
+  if (isNaN(ttl)) { ttl = 3600 * 24 * 7; }
+  if (isNaN(maxAttempts)) { maxAttempts = 5; }
 
   const buffer = [];
   let busy = false;
@@ -216,7 +222,7 @@ module.exports = function () {
           try {
             docs = yield queryHal(Array.from(packet.identifiants), Array.from(packet.docids));
           } catch (e) {
-            self.logger.error(metal);
+            self.logger.error(methal);
             self.logger.error(`hal: ${e.message}`);
           }
 
@@ -283,13 +289,13 @@ module.exports = function () {
             self.logger.error('docid null non chargé');
             return Promise.reject(e);
           }
-
+          // loadEc a renvoye null car redirection de portail à portail.
           if (!ec) {
-            // Il faut virer l'EC car c'est une redirection de portail à portail.
-            done(new Error());
+            const err = new Error('portal to portal redirection');
+            err.type = 'EIRRELEVANT';
+            done(err);
             continue;
           }
-
           done();
         }
       }
@@ -310,24 +316,24 @@ module.exports = function () {
       let sidDepot = null;
 
       if (doc) {
-        ec['hal_docid']         = doc.docid;
-        ec['hal_identifiant']   = doc.halId_s;
+        ec['hal_docid'] = doc.docid;
+        ec['hal_identifiant'] = doc.halId_s;
         ec['publication_title'] = (doc.title_s || [''])[0];
-        ec['hal_tampons']       = (doc.collId_i || []).join(',');
-        ec['hal_tampons_name']  = (doc.collCode_s || []).join(',');
-        ec['hal_domains']       = (doc.domain_s || []).join(',');
+        ec['hal_tampons'] = (doc.collId_i || []).join(',');
+        ec['hal_tampons_name'] = (doc.collCode_s || []).join(',');
+        ec['hal_domains'] = (doc.domain_s || []).join(',');
 
         sidDepot = doc.sid_i;
 
         // Formatage du document à mettre en cache
         cacheDoc = [];
-        cacheDoc['hal_docid']         = ec.hal_docid;
-        cacheDoc['hal_identifiant']   = ec.hal_identifiant;
+        cacheDoc['hal_docid'] = ec.hal_docid;
+        cacheDoc['hal_identifiant'] = ec.hal_identifiant;
         cacheDoc['publication_title'] = ec.publication_title;
-        cacheDoc['hal_tampons']       = ec.hal_tampons;
-        cacheDoc['hal_tampons_name']  = ec.hal_tampons_name;
-        cacheDoc['hal_domains']       = ec.hal_domains;
-        cacheDoc['hal_sid']           = sidDepot;
+        cacheDoc['hal_tampons'] = ec.hal_tampons;
+        cacheDoc['hal_tampons_name'] = ec.hal_tampons_name;
+        cacheDoc['hal_domains'] = ec.hal_domains;
+        cacheDoc['hal_sid'] = sidDepot;
       }
 
       let idTocache = identifiantOriginel || ec.hal_identifiant;
@@ -368,16 +374,11 @@ module.exports = function () {
     return co(function* () {
       if (!sidDepot) { return false; }
 
-      const sidDomain = yield getSite('PORTAIL', ec.domain, 'docid');
-
-      if (ec.hal_consult_collection) {
-        // eslint-disable-next-line max-len
-        ec['hal_consult_collection_sid'] = yield getSite('COLLECTION', ec.hal_consult_collection, 'docid');
-      }
+      const sidDomain = yield getSite(ec.domain, 'id');
 
       if (ec.hal_redirection === true) {
         ec['hal_endpoint_portail_sid'] = sidDepot;
-        ec['hal_endpoint_portail'] = yield getSite('ID', sidDepot, 'url_s');
+        ec['hal_endpoint_portail'] = yield getSite(sidDepot, 'url');
       }
 
       if (ec.hal_redirection === true && !ec.hal_consult_collection && sidDomain == sidDepot) {
@@ -399,10 +400,20 @@ module.exports = function () {
   function queryHal(identifiants, docids) {
     report.inc('general', 'hal-queries');
 
-    let search = `halId_s:(${identifiants.map(id => `${id}`).join(' OR ')})`;
+    let search = '';
+    if (identifiants.length > 0) {
+      search = `halId_s:(${identifiants.map(id => `${id}`).join(' OR ')})`;
+    }
 
     if (docids.length > 0) {
-      search += ` OR docid:(${docids.map(id => `${id}`).join(' OR ')})`;
+      if (search.length > 0) {
+        search += ` OR `;
+      }
+      search += `docid:(${docids.map(id => `${id}`).join(' OR ')})`;
+    }
+
+    if (search.length == 0) {
+      return {};
     }
 
     return new Promise((resolve, reject) => {
@@ -456,57 +467,51 @@ module.exports = function () {
     });
   }
 
-  function querySiteHal(type, site, returnParam) {
+  function querySitesHal() {
     report.inc('general', 'site-queries');
 
-    let search;
-
-    if (type == 'ID') {
-      search = `docid:${site}`;
-    } else if (type == 'COLLECTION') {
-      search = `site_s:${site}`;
-    } else {
-      search = `url_s:${site}`;
-    }
-
     return new Promise((resolve, reject) => {
-      methal.findOne(search, { fields: returnParam, core: 'ref_site' }, (err, doc) => {
+      methal.find('', { core: 'ref/instance', arg: 'wantDeprecated=true' }, (err, sites) => {
         if (err) {
           report.inc('general', 'hal-fails');
           return reject(err);
         }
 
-        return resolve(doc);
+        return resolve(sites);
       });
     });
   }
 
-  function getSite(type, sitename, returnParam) {
+
+  function getSite(sitename, returnParam) {
     return co(function* () {
 
       // Récupération du sid ou nom dans le cache si possible
-      let cachedParam = yield checkCache(sitename);
+      let sitetofind = sitename.toString().replace(/https?:\/\//, '');
+      let cachedParam = yield checkCache(sitename.toString().replace('/https?:\/\//', ''));
+
       if (cachedParam) {
         return cachedParam;
       }
+      self.logger.error(`Site not found in cache : ${sitename}`);
 
-      let toreturn;
+      let tocache;
       let tries = 0;
 
       // Récupération du sid depuis l'API de HAL
-      while (!toreturn) {
+      while (!tocache) {
         if (++tries > maxAttempts) {
           throw new Error(`Failed to query ref_site HAL ${maxAttempts} times in a row`);
         }
 
         try {
-          let doc = yield querySiteHal(type, sitename, returnParam);
-          if (!doc) {
+          let sites = yield querySitesHal();
+          if (!sites) {
             self.logger.error(`No site found for sitename ${sitename}`);
-            toreturn = 0;
+            tocache = 0;
             break;
           } else {
-            toreturn = doc[returnParam];
+            tocache = sites;
           }
         } catch (e) {
           // La requête à l'API a planté mais on essaie maxAttempts fois avant de déclarer forfait
@@ -517,14 +522,20 @@ module.exports = function () {
       }
 
 
+      let toreturn;
       try {
         // On cache à la fois la correspondance ID=>Name et Name=>ID
-        if (Array.isArray(toreturn)) {
-          toreturn = toreturn[0];
-        }
-
-        yield cacheResult(sitename, toreturn);
-        yield cacheResult(toreturn, sitename);
+	for (var site of tocache) {
+	  let url = site.url.replace(/https?:\\?\/\\?\//, '');
+          yield cacheResult(site.id.toString(), url);
+          yield cacheResult(url, site.id.toString());
+          if (sitename == site.id.toString()) {
+            toreturn = site.url;
+	  }
+          if (sitename == site.url) {
+            toreturn = site.id;
+	  }
+        };
       } catch (e) {
         report.inc('general', 'hal-cache-fail');
       }
@@ -532,6 +543,7 @@ module.exports = function () {
       return toreturn;
     });
   }
+
 
   function cacheResult(id, doc) {
 
@@ -544,5 +556,4 @@ module.exports = function () {
       });
     });
   }
-
 };

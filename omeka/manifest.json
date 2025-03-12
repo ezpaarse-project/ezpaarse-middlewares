@@ -1,0 +1,11 @@
+{
+  "headers": [
+    { "name": "omeka-platform" },
+    { "name": "omeka-key" },
+    { "name": "omeka-cache" },
+    { "name": "omeka-ttl" },
+    { "name": "omeka-throttle" },
+    { "name": "omeka-max-tries" },
+    { "name": "omeka-base-wait-time" }
+  ]
+}

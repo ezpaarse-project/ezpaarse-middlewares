@@ -1,0 +1,12 @@
+{
+  "headers": [
+    { "name": "omekas-platform" },
+    { "name": "omekas-key-identity" },
+    { "name": "omekas-key-credential" },
+    { "name": "omekas-cache" },
+    { "name": "omekas-ttl" },
+    { "name": "omekas-throttle" },
+    { "name": "omekas-max-tries" },
+    { "name": "omekas-base-wait-time" }
+  ]
+}

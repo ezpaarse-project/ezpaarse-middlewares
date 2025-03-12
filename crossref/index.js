@@ -1,7 +1,8 @@
 'use strict';
 
 const co         = require('co');
-const crossref   = require('crossref');
+const request    = require('request');
+const data       = require('./crossref-rtype.json'); // matching between ezPAARSE and Crossref types
 const cache      = ezpaarse.lib('cache')('crossref');
 const doiPattern = /^10\.[0-9]{4,}\/[a-z0-9\-._: ;()/]+$/i;
 
@@ -9,9 +10,10 @@ const doiPattern = /^10\.[0-9]{4,}\/[a-z0-9\-._: ;()/]+$/i;
  * Enrich ECs with crossref data
  */
 module.exports = function () {
-  const self           = this;
-  const req            = this.request;
-  const report         = this.report;
+  const self   = this;
+  const req    = this.request;
+  const report = this.report;
+
   const disabled       = /^false$/i.test(req.header('crossref-enrich'));
   const cacheEnabled   = !/^false$/i.test(req.header('crossref-cache'));
   const includeLicense = /^true$/i.test(req.header('crossref-license'));
@@ -21,7 +23,36 @@ module.exports = function () {
     return function (ec, next) { next(); };
   }
 
+  let apiToken = req.header('crossref-plus-api-token');
+  let userAgent = req.header('crossref-user-agent');
+
+  if (!userAgent) {
+    userAgent = 'ezPAARSE (https://readmetrics.org; mailto:ezteam@couperin.org)';
+  }
+
+  const queryHeaders = {
+    'user-agent': userAgent
+  };
+
+  if (apiToken) {
+    if (!/^bearer /i.test(apiToken)) {
+      apiToken = `Bearer ${apiToken}`;
+    }
+    queryHeaders['crossref-plus-api-token'] = apiToken;
+  }
+
+
   self.logger.verbose('Crossref cache: %s', cacheEnabled ? 'enabled' : 'disabled');
+
+  // Strategy to adopt when an enrichment reaches maxTries : abort, ignore, retry
+  let onFail = (req.header('crossref-on-fail') || 'abort').toLowerCase();
+  let onFailValues = ['abort', 'ignore', 'retry'];
+
+  if (onFail && !onFailValues.includes(onFail)) {
+    const err = new Error(`Crossref-On-Fail should be one of: ${onFailValues.join(', ')}`);
+    err.status = 400;
+    return err;
+  }
 
   if (this.job.outputFields.added.indexOf('title') === -1) {
     this.job.outputFields.added.push('title');
@@ -42,10 +73,14 @@ module.exports = function () {
   const packetSize = parseInt(req.header('crossref-paquet-size')) || 50;
   // Minimum number of ECs to keep before resolving them
   let bufferSize   = parseInt(req.header('crossref-buffer-size'));
+  // Maximum enrichment attempts
+  let maxTries     = parseInt(req.header('crossref-max-tries'));
+  // Base wait time after a request fails
+  let baseWaitTime = parseInt(req.header('crossref-base-wait-time'));
 
-  if (isNaN(bufferSize)) {
-    bufferSize = 1000;
-  }
+  if (isNaN(bufferSize)) { bufferSize = 1000; }
+  if (isNaN(maxTries)) { maxTries = 5; }
+  if (isNaN(baseWaitTime)) { baseWaitTime = 1000; }
 
   const buffer = [];
   let busy = false;
@@ -59,6 +94,11 @@ module.exports = function () {
   report.set('general', 'crossref-queries', 0);
   report.set('general', 'crossref-fails', 0);
   report.set('general', 'crossref-invalid-dois', 0);
+
+  let minResponseTime = -1;
+  let maxResponseTime = -1;
+  report.set('general', 'crossref-min-response-time', minResponseTime);
+  report.set('general', 'crossref-max-response-time', maxResponseTime);
 
   return new Promise(function (resolve, reject) {
     cache.checkIndexes(ttl, function (err) {
@@ -182,8 +222,7 @@ module.exports = function () {
           continue;
         }
 
-        const maxAttempts = 5;
-        const results     = new Map();
+        const results = new Map();
 
         for (const identifier of ['doi', 'alternative-id']) {
           if (packet[identifier].size === 0) { continue; }
@@ -191,19 +230,31 @@ module.exports = function () {
           let list;
 
           while (!list) {
-            if (++tries > maxAttempts) {
-              const err = new Error(`Failed to query Crossref ${maxAttempts} times in a row`);
-              return Promise.reject(err);
+            if (tries >= maxTries) {
+              if (onFail === 'ignore') {
+                self.logger.error(
+                  `Crossref: ignoring packet enrichment after ${maxTries} failed attempts`
+                );
+                packet.ecs.forEach(([, done]) => done());
+                return;
+              }
+
+              if (onFail === 'abort') {
+                const err = new Error(`Failed to query Crossref ${maxTries} times in a row`);
+                return Promise.reject(err);
+              }
             }
+
+            yield wait(tries === 0 ? throttle : baseWaitTime * Math.pow(2, tries));
 
             try {
               list = yield queryCrossref(identifier, Array.from(packet[identifier]));
             } catch (e) {
+              report.inc('general', 'crossref-fails');
               self.logger.error(`Crossref: ${e.message}`);
-              handleCrossrefError(e);
             }
 
-            yield wait();
+            tries += 1;
           }
 
           for (const item of list) {
@@ -268,30 +319,42 @@ module.exports = function () {
     });
   }
 
-  function wait() {
-    return new Promise(resolve => { setTimeout(resolve, throttle); });
+  function wait(ms) {
+    return new Promise(resolve => { setTimeout(resolve, ms); });
   }
 
-  function handleCrossrefError(e) {
-    const match = /rate limit exceeded: (\d+) requests in (\d+)([smh])/i.exec(e.message);
-    if (!match) { return; }
+  function handleCrossrefRateLimit(response) {
+    const headers = (response && response.headers) || {};
+    const limitHeader = headers['x-rate-limit-limit'];
+    const intervalHeader = headers['x-rate-limit-interval'];
 
-    let interval   = parseInt(match[2]);
-    let nbRequests = parseInt(match[1]);
+    if (!limitHeader || !intervalHeader) { return; }
 
-    if (interval > 0 && nbRequests > 0) {
-      switch (match[3]) {
-      case 'h':
-        interval *= 60;
-        // fallthrough
-      case 'm':
-        interval *= 60;
-        // fallthrough
-      case 's':
-        interval *= 1000;
-        throttle = nbRequests / interval;
-        self.logger.verbose('Crossref: limiting queries to %d req in %d ms', nbRequests, interval);
-      }
+    const nbRequests = Number.parseInt(limitHeader, 10);
+    const interval   = Number.parseInt(intervalHeader, 10); // always in seconds for convenience
+
+    if (!Number.isInteger(nbRequests) || nbRequests <= 0) { return; }
+    if (!Number.isInteger(interval) || interval <= 0) { return; }
+
+    const newThrottle = Math.ceil((interval / nbRequests) * 1000);
+
+    if (newThrottle !== throttle) {
+      const newRate = Math.ceil((1000 / newThrottle) * 100) / 100;
+      const oldRate = Math.ceil((1000 / throttle) * 100) / 100;
+      // eslint-disable-next-line max-len
+      self.logger.info(`Crossref: throttle changed from ${throttle}ms (${oldRate}q/s) to ${newThrottle}ms (${newRate}q/s)`);
+      throttle = newThrottle;
+    }
+  }
+
+  function handleResponseTime(responseTime) {
+    if (minResponseTime < 0 || responseTime < minResponseTime) {
+      minResponseTime = responseTime;
+      report.set('general', 'crossref-min-response-time', responseTime);
+    }
+    if (responseTime > maxResponseTime) {
+      maxResponseTime = responseTime;
+      report.set('general', 'crossref-max-response-time', responseTime);
     }
   }
 
@@ -299,15 +362,42 @@ module.exports = function () {
     report.inc('general', 'crossref-queries');
 
     return new Promise((resolve, reject) => {
-      crossref.works({ filter: { [property]: values }, rows: packetSize }, function (err, list) {
+      const startTime = Date.now();
+
+      request({
+        method: 'GET',
+        url: 'https://api.crossref.org/works',
+        timeout: 60000,
+        headers: queryHeaders,
+        json: true,
+        qs: {
+          filter: values.map(v => `${property}:${v}`).join(','),
+          rows: packetSize
+        }
+      }, (err, response, body) => {
+        handleCrossrefRateLimit(response);
+        handleResponseTime(Date.now() - startTime);
+
         if (err) {
-          report.inc('general', 'crossref-fails');
           return reject(err);
         }
 
+        const status = response && response.statusCode;
+
+        if (!status) {
+          return reject(new Error('request failed with no status code'));
+        }
+        if (status === 401) {
+          return reject(new Error('authentication error (is the token valid?)'));
+        }
+        if (status >= 400) {
+          return reject(new Error(`request failed with status ${status}`));
+        }
+
+        const list = body && body.message && body.message.items;
+
         if (!Array.isArray(list)) {
-          report.inc('general', 'crossref-fails');
-          return reject(new Error('invalid response'));
+          return reject(new Error('got invalid response from the API'));
         }
 
         return resolve(list);
@@ -327,6 +417,8 @@ module.exports = function () {
   }
 
   function aggregate(item, ec) {
+    if (!item) { return; }
+
     if (Array.isArray(item['container-title'])) {
       ec['publication_title'] = ec['publication_title'] || item['container-title'][0];
     }
@@ -335,13 +427,14 @@ module.exports = function () {
     }
     ec['doi'] = ec['doi'] || item['DOI'];
     ec['publisher_name'] = ec['publisher_name'] || item['publisher'];
-    ec['type'] = item['type'];
+    ec['type'] = ec['type'] || item['type'];
+    ec['rtype'] = ec['rtype'] || data[item['type']];
 
     if (item['issued'] && item['issued']['date-parts'] && item['issued']['date-parts'][0]) {
       ec['publication_date'] = ec['publication_date'] || item['issued']['date-parts'][0][0];
     }
     if (item['subject'] && Array.isArray(item['subject'])) {
-      ec['subject'] = item['subject'].join(', ');
+      ec['subject'] = ec['subject'] || item['subject'].join(', ');
     }
 
     if (Array.isArray(item['issn-type'])) {
@@ -352,19 +445,19 @@ module.exports = function () {
           ec['online_identifier'] = ec['online_identifier'] || issn.value;
         }
       });
-    } else if (Array.isArray(item['ISSN'])) {
-      if (item['ISSN'][0]) {
-        ec['print_identifier'] = ec['print_identifier'] || item['ISSN'][0];
-      }
-      if (item['ISSN'][1]) {
-        ec['online_identifier'] = ec['online_identifier'] || item['ISSN'][1];
-      }
+    }
+    if (Array.isArray(item['isbn-type'])) {
+      item['isbn-type'].forEach((isbn) => {
+        if (isbn.type === 'print') {
+          ec['print_identifier'] = ec['print_identifier'] || isbn.value;
+        } else if (isbn.type === 'electronic') {
+          ec['online_identifier'] = ec['online_identifier'] || isbn.value;
+        }
+      });
     }
 
     if (includeLicense && item['license']) {
       ec['license'] = JSON.stringify(item['license']);
     }
-
-    return item;
   }
 };
