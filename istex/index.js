@@ -315,8 +315,6 @@ module.exports = function () {
       accessCondition,
     } = result;
 
-    self.logger.info(JSON.stringify(result, null, 2));
-
     if (accessCondition) {
       ec['access_type'] = accessCondition.contentType;
       ec['oa_status'] = accessCondition.value;
