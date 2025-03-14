@@ -311,8 +311,16 @@ module.exports = function () {
       genre,
       host,
       doi,
-      arkIstex
+      arkIstex,
+      accessCondition,
     } = result;
+
+    self.logger.info(JSON.stringify(result, null, 2));
+
+    if (accessCondition) {
+      ec['access_type'] = accessCondition.contentType;
+      ec['oa_status'] = accessCondition.value;
+    }
 
     if (corpusName) {
       ec['publisher_name'] = corpusName;
@@ -339,16 +347,16 @@ module.exports = function () {
     if (language) { ec['language'] = getValue(language); }
 
     switch (ec['istex_rtype']) {
-      case 'fulltext':
-        ec['rtype'] = data[genre] || 'MISC';
-        break;
-      case 'metadata':
-      case 'enrichments':
-      case 'record':
-        ec['rtype'] = 'METADATA';
-        break;
-      default:
-        ec['rtype'] = 'MISC';
+    case 'fulltext':
+      ec['rtype'] = data[genre] || 'MISC';
+      break;
+    case 'metadata':
+    case 'enrichments':
+    case 'record':
+      ec['rtype'] = 'METADATA';
+      break;
+    default:
+      ec['rtype'] = 'MISC';
     }
   }
 };
