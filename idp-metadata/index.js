@@ -120,7 +120,7 @@ module.exports = function () {
         .then(() => process)
         .catch((err) => {
             logger.error(`[idp-metadata]: fail to load the mapping : ${err}`);
-            throw new Error('[idp-metadata]: fail to load the mapping');
+            throw err;
         });
 
     /**
