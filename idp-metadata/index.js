@@ -73,11 +73,12 @@ module.exports = function () {
             // If error, load local file list_idp.xml
             if (errIdP || responseIdP.statusCode !== 200) {
                 loadMapping('list_idp.xml', resolveIdP, rejectIdP);
-            };
 
-            lastRefresh = Date.now();
-            // convert xml to json
-            resolveIdP(xmlMapping.tojson(resultIdP));
+                
+                lastRefresh = Date.now();
+                // convert xml to json
+                resolveIdP(xmlMapping.tojson(resultIdP));
+            };
         });
     });
 
