@@ -72,6 +72,7 @@ module.exports = function () {
         request(optionsIdP, (errIdP, responseIdP, resultIdP) => {
             // If error, load local file list_idp.xml
             if (errIdP || responseIdP.statusCode !== 200) {
+                // FIXME the result of loadMapping is not used
                 loadMapping('list_idp.xml', resolveIdP, rejectIdP);
 
                 
