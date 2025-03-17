@@ -45,7 +45,7 @@ const dataset = [
   }
 ];
 
-describe('thesesfr-personne', function () {
+describe('idp-metadata', function () {
   this.timeout(10000);
 
   it('should correctly fill IDP label', async () => {
