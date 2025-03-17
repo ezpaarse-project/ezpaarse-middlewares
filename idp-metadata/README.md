@@ -2,10 +2,6 @@
 
 Fetches Identity Providers (IDP) list from Renater, and enrich EC with the IDP label.
 
-## Warning
-
-This middleware depends on xml-mapping, a lib that will be deleted on ezpaarse soon
-
 ## Enriched fields
 
 | Name | Type   | Description |
