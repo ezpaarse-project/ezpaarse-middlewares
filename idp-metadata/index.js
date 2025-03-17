@@ -118,7 +118,7 @@ module.exports = function () {
                 const info = etab.md$IDPSSODescriptor.md$Extensions.mdui$UIInfo;
                 const libelle_idp = info.mdui$DisplayName.find((displayName) => displayName.xml$lang === "fr");
                 if (libelle_idp) {
-                    ec.libelle_idp = ilibelle_idp.$t;
+                    ec.libelle_idp = libelle_idp.$t;
                 }
             }
         }
