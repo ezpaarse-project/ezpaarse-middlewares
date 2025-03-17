@@ -48,6 +48,39 @@ module.exports = function () {
         onPacket: co.wrap(onPacket)
     });
 
+    /**
+     * Takes the XML string of a metadata file and creates a map
+     * that match IDP URL with the french display name
+     * @param {string} xmlString
+     */
+    function loadIDPMappingFromXMLString(xmlString) {
+        const parser = new XMLParser(xmlParseOption);
+        idpList = parser.parse(xmlString);
+
+        const entities = idpList['md:EntitiesDescriptor']['md:EntityDescriptor']
+
+        idpList = new Map(
+            entities
+                .filter((entity) => (entity && entity['@_entityID']))
+                .map((entity) => {
+                    const entityID = entity['@_entityID'];
+                    const displayNames =
+                        entity['md:IDPSSODescriptor']
+                        && entity['md:IDPSSODescriptor']['md:Extensions']
+                        && entity['md:IDPSSODescriptor']['md:Extensions']['mdui:UIInfo']
+                        && entity['md:IDPSSODescriptor']['md:Extensions']['mdui:UIInfo']['mdui:DisplayName'];
+
+                    let displayName;
+
+                    if (Array.isArray(displayNames)) {
+                        const labelNode = displayNames.find((displayName) => displayName['@_xml:lang'] === 'fr');
+                        displayName = labelNode && labelNode['#text'];
+                    }
+                    return [entityID, displayName];
+                })
+        );
+    }
+
     // Load the local mapping file
     function loadLocalMapping() {
         return new Promise((resolve, reject) => {
@@ -56,8 +89,7 @@ module.exports = function () {
                     return reject(err);
                 }
 
-                const parser = new XMLParser(xmlParseOption);
-                idpList = parser.parse(content);
+                loadIDPMappingFromXMLString(content);
                 resolve();
             });
         });
@@ -77,8 +109,7 @@ module.exports = function () {
                     reject(errIdP || new Error(`Got unexpected status code ${responseIdP.statusCode}`));
                 } else {
                     // convert xml to json
-                    const parser = new XMLParser(xmlParseOption);
-                    idpList = parser.parse(resultIdP);
+                    loadIDPMappingFromXMLString(resultIdP);
                     lastRefresh = Date.now();
                     resolve();
                 }
@@ -142,26 +173,15 @@ module.exports = function () {
      * @param {Object} result the document used to enrich the EC
      */
     function enrichEc(ec) {
-        if(ec['Shib-Identity-Provider']) {
-            logger.info(`[idp-metadata]: try to find an IDP label for ${ec['Shib-Identity-Provider']} , to the EC ${ec.unitid}`);
+        const idp = ec['Shib-Identity-Provider'];
 
-            const etab = idpList['md:EntitiesDescriptor']['md:EntityDescriptor'].find(
-                (entityDescriptor) =>  entityDescriptor['@_entityID'] === ec['Shib-Identity-Provider']
-            );
-
-            ec.libelle_idp = "";
-
-            if (etab) {
-                const info = etab['md:IDPSSODescriptor']['md:Extensions']['mdui:UIInfo'];
-                const libelle_idp = info['mdui:DisplayName'].find((displayName) => displayName['@_xml:lang'] === "fr");
-
-                if (libelle_idp) {
-                    ec.libelle_idp = libelle_idp['#text'];
-                }
-            }
+        if (!idp) {
+            ec.libelle_idp = 'sans objet';
+            return;
         }
-        if (!ec.libelle_idp) {
-            ec.libelle_idp = "sans objet"
-        }
+
+        logger.info(`[idp-metadata]: try to find an IDP label for ${idp} , to the EC ${ec.unitid}`);
+
+        ec.libelle_idp = idpList.get(idp) || 'sans objet';
     }
 };
