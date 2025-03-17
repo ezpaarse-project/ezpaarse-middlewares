@@ -1,13 +1,17 @@
 'use strict';
 
+const path = require('path');
+const fs = require('fs');
 const co = require('co');
 const request = require('request');
 const { bufferedProcess, wait } = require('../utils.js');
 const xmlMapping = require('xml-mapping')
 
+const localMappingFile = path.resolve(__dirname, 'list_idp.xml');
+
 const oneDay = 24 * 60 * 60 * 1000;
 let lastRefresh = Date.now();
-let list_idp;
+let idpList;
 
 module.exports = function () {
     const logger = this.logger;
@@ -39,55 +43,74 @@ module.exports = function () {
         onPacket: co.wrap(onPacket)
     });
 
-    // Load list_idp.xml file
-    function loadMapping(filename, resolve, reject){
-        fs.readFile(path.resolve(__dirname, filename), 'utf8', (err, content) => {
-            if (err) {
-                return reject(err);
-            }
+    // Load the local mapping file
+    function loadLocalMapping() {
+        return new Promise((resolve, reject) => {
+            fs.readFile(localMappingFile, 'utf8', (err, content) => {
+                if (err) {
+                    return reject(err);
+                }
 
-            try {
-                logger.info(`[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : load file ${filename} OK`);
-                return resolve(content);
-            } catch (e) {
-                return reject(e);
-            }
+                idpList = xmlMapping.tojson(content);
+                resolve();
+            });
         });
     }
 
-
-
-    const promiseIdP = new Promise((resolveIdP, rejectIdP) => {
-
-        if (list_idp && ((Date.now() - lastRefresh) < oneDay)) { return resolveIdP(list_idp); }
-
-        logger.info('[idp-metadata]: mapping reload');
-
-        // Load mapping from Renater web service
+    // Load mapping from the Renater web service
+    function loadRemoteMappingFile() {
         const optionsIdP = {
             method: 'GET',
             uri: `https://pub.federation.renater.fr/metadata/renater/main/main-idps-renater-metadata.xml`
         };
 
-        request(optionsIdP, (errIdP, responseIdP, resultIdP) => {
-            // If error, load local file list_idp.xml
-            if (errIdP || responseIdP.statusCode !== 200) {
-                // FIXME the result of loadMapping is not used
-                loadMapping('list_idp.xml', resolveIdP, rejectIdP);
+        return new Promise((resolve, reject) => {
+            request(optionsIdP, (errIdP, responseIdP, resultIdP) => {
+                // If error, load local file list_idp.xml
+                if (errIdP || responseIdP.statusCode !== 200) {
+                    reject(errIdP || new Error(`Got unexpected status code ${responseIdP.statusCode}`));
+                } else {
+                    // convert xml to json
+                    idpList = xmlMapping.tojson(resultIdP);
+                    lastRefresh = Date.now();
+                    resolve();
+                }
 
-                
-                lastRefresh = Date.now();
-                // convert xml to json
-                resolveIdP(xmlMapping.tojson(resultIdP));
-            };
+            });
         });
+    }
+
+    const promiseIdP = new Promise((resolve, reject) => {
+
+        if (idpList && ((Date.now() - lastRefresh) < oneDay)) { return resolve(); }
+
+        logger.info('[idp-metadata]: reloading mapping...');
+
+        loadRemoteMappingFile()
+            .then(() => {
+                logger.info('[idp-metadata]: mapping reloaded');
+                resolve();
+            })
+            .catch((err) => {
+                logger.error(`[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : ${err}`);
+                logger.error(`[idp-metadata]: Loading local XML file ${localMappingFile}`);
+
+                loadLocalMapping()
+                    .then(() => {
+                        logger.info('[idp-metadata]: local mapping loaded');
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+            })
+
+
+
     });
 
     return promiseIdP
-        .then((result) => {
-            list_idp = result;
-            return process;
-        })
+        .then(() => process)
         .catch((err) => {
             logger.error(`[idp-metadata]: fail to load the mapping : ${err}`);
             throw new Error('[idp-metadata]: fail to load the mapping');
@@ -114,7 +137,7 @@ module.exports = function () {
     function enrichEc(ec) {
         if(ec['Shib-Identity-Provider']) {
             logger.info(`[idp-metadata]: try to find an IDP label for ${ec['Shib-Identity-Provider']} , to the EC ${ec.unitid}`);
-            const etab = list_idp.md$EntitiesDescriptor.md$EntityDescriptor.find((entityDescriptor) => entityDescriptor.entityID === ec['Shib-Identity-Provider']);
+            const etab = idpList.md$EntitiesDescriptor.md$EntityDescriptor.find((entityDescriptor) => entityDescriptor.entityID === ec['Shib-Identity-Provider']);
             ec.libelle_idp = "";
             if (etab) {
                 const info = etab.md$IDPSSODescriptor.md$Extensions.mdui$UIInfo;
