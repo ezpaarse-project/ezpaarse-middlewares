@@ -4,10 +4,15 @@ const path = require('path');
 const fs = require('fs');
 const co = require('co');
 const request = require('request');
-const { bufferedProcess, wait } = require('../utils.js');
-const xmlMapping = require('xml-mapping')
+const { bufferedProcess } = require('../utils.js');
+const { XMLParser } = require('fast-xml-parser');
 
 const localMappingFile = path.resolve(__dirname, 'list_idp.xml');
+
+const xmlParseOption = {
+    alwaysCreateTextNode: true,
+    ignoreAttributes: false,
+};
 
 const oneDay = 24 * 60 * 60 * 1000;
 let lastRefresh = Date.now();
@@ -51,7 +56,8 @@ module.exports = function () {
                     return reject(err);
                 }
 
-                idpList = xmlMapping.tojson(content);
+                const parser = new XMLParser(xmlParseOption);
+                idpList = parser.parse(content);
                 resolve();
             });
         });
@@ -71,7 +77,8 @@ module.exports = function () {
                     reject(errIdP || new Error(`Got unexpected status code ${responseIdP.statusCode}`));
                 } else {
                     // convert xml to json
-                    idpList = xmlMapping.tojson(resultIdP);
+                    const parser = new XMLParser(xmlParseOption);
+                    idpList = parser.parse(resultIdP);
                     lastRefresh = Date.now();
                     resolve();
                 }
@@ -137,13 +144,19 @@ module.exports = function () {
     function enrichEc(ec) {
         if(ec['Shib-Identity-Provider']) {
             logger.info(`[idp-metadata]: try to find an IDP label for ${ec['Shib-Identity-Provider']} , to the EC ${ec.unitid}`);
-            const etab = idpList.md$EntitiesDescriptor.md$EntityDescriptor.find((entityDescriptor) => entityDescriptor.entityID === ec['Shib-Identity-Provider']);
+
+            const etab = idpList['md:EntitiesDescriptor']['md:EntityDescriptor'].find(
+                (entityDescriptor) =>  entityDescriptor['@_entityID'] === ec['Shib-Identity-Provider']
+            );
+
             ec.libelle_idp = "";
+
             if (etab) {
-                const info = etab.md$IDPSSODescriptor.md$Extensions.mdui$UIInfo;
-                const libelle_idp = info.mdui$DisplayName.find((displayName) => displayName.xml$lang === "fr");
+                const info = etab['md:IDPSSODescriptor']['md:Extensions']['mdui:UIInfo'];
+                const libelle_idp = info['mdui:DisplayName'].find((displayName) => displayName['@_xml:lang'] === "fr");
+
                 if (libelle_idp) {
-                    ec.libelle_idp = libelle_idp.$t;
+                    ec.libelle_idp = libelle_idp['#text'];
                 }
             }
         }
