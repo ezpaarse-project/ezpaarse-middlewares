@@ -2,6 +2,10 @@
 
 Fetches Identity Providers (IDP) list from Renater, and enrich EC with the IDP label.
 
+## Warning
+
+This middleware depends on xml-mapping, a lib that will be deleted on ezpaarse soon
+
 ## Enriched fields
 
 | Name | Type   | Description |
@@ -16,7 +20,7 @@ You can add or remove idp-metadata by default to all your enrichments, provided 
 
 ### ezPAARSE process interface
 
-You can use thesesfr for an enrichment process. You just add the middleware
+You can use idp-metadata for an enrichment process. You just add the middleware
 
 ### ezp
 
