@@ -35,19 +35,19 @@ module.exports = function () {
          * @param {Object} ec
          * @returns {Boolean|Promise} true if the EC as an unitid, false otherwise
          */
-        filter: ec => !!ec?.unitid,
+        filter: ec => ec.unitid,
         onPacket: co.wrap(onPacket)
     });
 
-    //Chargement du mapping par fichier (list_idp.xml)
-    function chargeMapping(nomFichier, resolve, reject){
-        fs.readFile(path.resolve(__dirname, nomFichier), 'utf8', (err, content) => {
+    // Load list_idp.xml file
+    function loadMapping(filename, resolve, reject){
+        fs.readFile(path.resolve(__dirname, filename), 'utf8', (err, content) => {
             if (err) {
                 return reject(err);
             }
 
             try {
-                logger.info('[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : load file '+nomFichier+' OK');
+                logger.info(`[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : load file ${filename} OK`);
                 return resolve(content);
             } catch (e) {
                 return reject(e);
@@ -63,35 +63,33 @@ module.exports = function () {
 
         logger.info('[idp-metadata]: mapping reload');
 
-        //Chargement du mapping par appel au web service Renater
+        // Load mapping from Renater web service
         const optionsIdP = {
             method: 'GET',
             uri: `https://pub.federation.renater.fr/metadata/renater/main/main-idps-renater-metadata.xml`
         };
 
         request(optionsIdP, (errIdP, responseIdP, resultIdP) => {
-            //Si erreur, chargement du fichier list_idp.xml, a la place
+            // If error, load local file list_idp.xml
             if (errIdP || responseIdP.statusCode !== 200) {
-                chargeMapping('list_idp.xml', resolveIdP, rejectIdP);
+                loadMapping('list_idp.xml', resolveIdP, rejectIdP);
             };
 
             lastRefresh = Date.now();
-            //Transformation du fichier de metadonnees XML en JSON
+            // convert xml to json
             resolveIdP(xmlMapping.tojson(resultIdP));
         });
     });
 
-    return new Promise(function (resolve, reject) {
-        Promise.all([promiseIdP])
-            .then((promises) => {
-                list_idp = promises[0];
-                resolve(process);
-            })
-            .catch(function(err) {
-                logger.error(`[idp-metadata]: fail to load the mapping : ${err}`);
-                return reject(new Error('[idp-metadata]: fail to load the mapping'));
-            });
-    });
+    return promiseIdP
+        .then((result) => {
+            list_idp = result;
+            return process;
+        })
+        .catch((err) => {
+            logger.error(`[idp-metadata]: fail to load the mapping : ${err}`);
+            throw new Error('[idp-metadata]: fail to load the mapping');
+        });
 
     /**
      * Process a packet of ECs
@@ -118,7 +116,10 @@ module.exports = function () {
             ec.libelle_idp = "";
             if (etab) {
                 const info = etab.md$IDPSSODescriptor.md$Extensions.mdui$UIInfo;
-                ec.libelle_idp = info.mdui$DisplayName.find((displayName) => displayName.xml$lang === "fr")?.$t;
+                const libelle_idp = info.mdui$DisplayName.find((displayName) => displayName.xml$lang === "fr");
+                if (libelle_idp) {
+                    ec.libelle_idp = ilibelle_idp.$t;
+                }
             }
         }
         if (!ec.libelle_idp) {
