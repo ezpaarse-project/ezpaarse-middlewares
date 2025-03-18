@@ -18,9 +18,13 @@ function isIpInRange(ip, ranges) {
   const ipBase = `${ipBlock1}.${ipBlock2}`
   for (const [range, ibabes] of ranges) {
     // 127.0.100-110.0-256
-    const suffix = range.split(`${ipBase}.`)[1]
-    // rangeBlock3: 100-110 
-    // rangeBlock4: 0-256 
+    if (!range) {
+      continue;
+    }
+    const suffix = range.split(`${ipBase}.`)[1];
+    if (!suffix) {
+      continue;
+    }
     const [rangeBlock3, rangeBlock4] = suffix.split('.');
     if (rangeBlock3.includes('-')) {
       // inf3: 100
