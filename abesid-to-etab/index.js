@@ -73,7 +73,7 @@ module.exports = function () {
       'Nom et prenom contact': 'institutionContact',
       'Adresse mail contact': 'institutionEmail',
       'IP validees': 'institutionIpRange'
-    }
+    };
   }
 
   let institutions = {};
