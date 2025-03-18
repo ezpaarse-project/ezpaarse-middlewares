@@ -5,7 +5,7 @@ const fs = require('fs');
 const request = require('request');
 const { XMLParser } = require('fast-xml-parser');
 
-const localMappingFile = path.resolve(__dirname, 'list_idp.xml');
+const localMappingFile = path.resolve(__dirname, 'idps.json');
 
 const xmlParseOption = {
   alwaysCreateTextNode: true,
@@ -21,18 +21,34 @@ module.exports = function () {
 
   logger.info('Initializing ABES idp-metadata middleware');
 
+/**
+ * Load the local IDP mapping file
+ *
+ * @returns {Promise<void>}
+ */
+  function loadLocalFile() {
+    return new Promise((resolve, reject) => {
+      fs.readFile(localMappingFile, (err, content) => {
+        if (err) { return reject(err); }
+
+        idpList = JSON.parse(content);
+        resolve();
+      });
+    });
+  }
+
   /**
-  * Takes the XML string of a metadata file and creates a map
+  * Takes the XML string of a metadata file and returns a map
   * that match IDP URL with the french display name
   * @param {string} xmlString
+  * @returns {Object}
   */
-  function loadIDPMappingFromXMLString(xmlString) {
+  function getMappingFromXML(xmlString) {
     const parser = new XMLParser(xmlParseOption);
-    idpList = parser.parse(xmlString);
+    const metadata = parser.parse(xmlString);
+    const entities = metadata['md:EntitiesDescriptor']['md:EntityDescriptor']
 
-    const entities = idpList['md:EntitiesDescriptor']['md:EntityDescriptor']
-
-    idpList = new Map(
+    return Object.fromEntries(
       entities
         .filter((entity) => (entity && entity['@_entityID']))
         .map((entity) => {
@@ -54,22 +70,11 @@ module.exports = function () {
     );
   }
 
-  // Load the local mapping file
-  function loadLocalMapping() {
-    return new Promise((resolve, reject) => {
-      fs.readFile(localMappingFile, 'utf8', (err, content) => {
-        if (err) {
-          return reject(err);
-        }
-
-        loadIDPMappingFromXMLString(content);
-        resolve();
-      });
-    });
-  }
-
-  // Load mapping from the Renater web service
-  function loadRemoteMappingFile() {
+  /**
+   * Fetch the latest IDP XML from Renater and update the mapping file
+   * @return {Promise<void>}
+   */
+  function updateIDPList() {
     const optionsIdP = {
       method: 'GET',
       uri: `https://pub.federation.renater.fr/metadata/renater/main/main-idps-renater-metadata.xml`
@@ -77,16 +82,19 @@ module.exports = function () {
 
     return new Promise((resolve, reject) => {
       request(optionsIdP, (errIdP, responseIdP, resultIdP) => {
-        // If error, load local file list_idp.xml
         if (errIdP || responseIdP.statusCode !== 200) {
-          reject(errIdP || new Error(`Got unexpected status code ${responseIdP.statusCode}`));
-        } else {
-          // convert xml to json
-          loadIDPMappingFromXMLString(resultIdP);
-          lastRefresh = Date.now();
-          resolve();
+          return reject(errIdP || new Error(`Got unexpected status code ${responseIdP.statusCode}`));
         }
 
+        idpList = getMappingFromXML(resultIdP);
+
+        fs.writeFile(localMappingFile, JSON.stringify(idpList, null, 2), (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
       });
     });
   }
@@ -103,7 +111,7 @@ module.exports = function () {
 
     if (idp) {
       logger.info(`[idp-metadata]: try to find an IDP label for ${idp} , to the EC ${ec.unitid}`);
-      ec.libelle_idp = idpList.get(idp) || 'sans objet';
+      ec.libelle_idp = idpList[idp] || 'sans objet';
     } else {
       ec.libelle_idp = 'sans objet';
     }
@@ -111,36 +119,62 @@ module.exports = function () {
     next();
   }
 
+  /**
+   * Check if the IDP mapping must be updated and update it if necessary (max once a day)
+   * @returns {Promise<void>}
+   */
+  function checkUpdate() {
+    return new Promise((resolve, reject) => {
   const promiseIdP = new Promise((resolve, reject) => {
 
     if (idpList && ((Date.now() - lastRefresh) < oneDay)) { return resolve(); }
+      if (idpList && ((Date.now() - lastRefresh) < oneDay)) {
+        return resolve();
+      }
 
-    logger.info('[idp-metadata]: reloading mapping...');
+      logger.info('[idp-metadata]: reloading mapping...');
 
-    loadRemoteMappingFile()
-    .then(() => {
-      logger.info('[idp-metadata]: mapping reloaded');
-      resolve();
-    })
-    .catch((err) => {
-      logger.error(`[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : ${err}`);
-      logger.error(`[idp-metadata]: Loading local XML file ${localMappingFile}`);
-
-      loadLocalMapping()
+      updateIDPList()
         .then(() => {
-          logger.info('[idp-metadata]: local mapping loaded');
+          lastRefresh = Date.now();
+          logger.info('[idp-metadata]: mapping reloaded');
           resolve();
         })
         .catch((err) => {
+          logger.error(`[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : ${err}`);
           reject(err);
         });
     });
-  });
+  }
 
-  return promiseIdP
+  /**
+   * Initialize the process
+   * Load the local mapping file if it exists, otherwise check for updates
+   * @returns {Promise<void>}
+   */
+  function init() {
+    if (idpList) {
+      return checkUpdate();
+    }
+
+    return loadLocalFile()
+      .then(() => {
+        logger.info(`[idp-metadata]: local mapping file loaded`);
+      })
+      .catch((err) => {
+        if (err.code === 'ENOENT') {
+          logger.error(`[idp-metadata]: Local mapping file not found`);
+        } else {
+          logger.error(`[idp-metadata]: Failed to load local mapping file`, err);
+        }
+      })
+      .finally(checkUpdate);
+  }
+
+  return init()
     .then(() => process)
     .catch((err) => {
-      logger.error(`[idp-metadata]: fail to load the mapping : ${err}`);
+      logger.error(`[idp-metadata]: fail to load the mapping`, err);
       throw err;
     });
 };
