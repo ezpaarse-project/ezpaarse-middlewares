@@ -20,11 +20,11 @@ module.exports = function () {
 
   logger.info('Initializing ABES idp-metadata middleware');
 
-/**
- * Load the local IDP mapping file
- *
- * @returns {Promise<void>}
- */
+  /**
+   * Load the local IDP mapping file
+   *
+   * @returns {Promise<void>}
+   */
   function loadLocalFile() {
     return new Promise((resolve, reject) => {
       fs.readFile(localMappingFile, (err, content) => {
@@ -52,11 +52,11 @@ module.exports = function () {
   }
 
   /**
-  * Takes the XML string of a metadata file and returns a map
-  * that match IDP URL with the french display name
-  * @param {string} xmlString
-  * @returns {Object}
-  */
+   * Takes the XML string of a metadata file and returns a map
+   * that match IDP URL with the french display name
+   * @param {string} xmlString
+   * @returns {Object}
+   */
   function getMappingFromXML(xmlString) {
     const parser = new XMLParser(xmlParseOption);
     const metadata = parser.parse(xmlString);
