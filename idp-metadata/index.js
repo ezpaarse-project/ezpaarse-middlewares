@@ -2,9 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const co = require('co');
 const request = require('request');
-const { bufferedProcess } = require('../utils.js');
 const { XMLParser } = require('fast-xml-parser');
 
 const localMappingFile = path.resolve(__dirname, 'list_idp.xml');
@@ -20,33 +18,8 @@ let idpList;
 
 module.exports = function () {
   const logger = this.logger;
-  const report = this.report;
-  const req = this.request;
 
   logger.info('Initializing ABES idp-metadata middleware');
-
-  // Maximum number of Theses or Persons to query
-  let packetSize = parseInt(req.header('idp-metadata-packet-size'));
-  // Minimum number of ECs to keep before resolving them
-  let bufferSize = parseInt(req.header('idp-metadata-buffer-size'));
-  if (isNaN(packetSize)) { packetSize = 100; } //Default : 50
-  if (isNaN(bufferSize)) { bufferSize = 1000; } //Default : 1000
-
-  report.set('idp-metadata', 'idp-metadata-queries', 0);
-  report.set('idp-metadata', 'idp-metadata-query-fails', 0);
-  report.set('idp-metadata', 'idp-metadata-cache-fails', 0);
-
-  const process = bufferedProcess(this, {
-    packetSize,
-    bufferSize,
-    /**
-    * Filter ECs that should be enriched
-    * @param {Object} ec
-    * @returns {Boolean|Promise} true if the EC as an unitid, false otherwise
-    */
-    filter: ec => ec.unitid,
-    onPacket: co.wrap(onPacket)
-  });
 
   /**
   * Takes the XML string of a metadata file and creates a map
@@ -118,6 +91,26 @@ module.exports = function () {
     });
   }
 
+  /**
+   * Enrich an EC using the result of a query
+   * @param {Object} ec the EC to be enriched
+   * @param {Function} next the function to call when the EC process is over
+   */
+  function process(ec, next) {
+    if (!ec || !ec.unitid) { return next(); }
+
+    const idp = ec['Shib-Identity-Provider'];
+
+    if (idp) {
+      logger.info(`[idp-metadata]: try to find an IDP label for ${idp} , to the EC ${ec.unitid}`);
+      ec.libelle_idp = idpList.get(idp) || 'sans objet';
+    } else {
+      ec.libelle_idp = 'sans objet';
+    }
+
+    next();
+  }
+
   const promiseIdP = new Promise((resolve, reject) => {
 
     if (idpList && ((Date.now() - lastRefresh) < oneDay)) { return resolve(); }
@@ -150,35 +143,4 @@ module.exports = function () {
       logger.error(`[idp-metadata]: fail to load the mapping : ${err}`);
       throw err;
     });
-
-  /**
-  * Process a packet of ECs
-  * @param {Array<Object>} ecs
-  * @param {Map<String, Set<String>>} groups
-  */
-  function* onPacket({ ecs }) {
-    if (ecs.length === 0) { return; }
-    for (const [ec, done] of ecs) {
-      enrichEc(ec)
-      done();
-    }
-  }
-
-  /**
-  * Enrich an EC using the result of a query
-  * @param {Object} ec the EC to be enriched
-  * @param {Object} result the document used to enrich the EC
-  */
-  function enrichEc(ec) {
-    const idp = ec['Shib-Identity-Provider'];
-
-    if (!idp) {
-      ec.libelle_idp = 'sans objet';
-      return;
-    }
-
-    logger.info(`[idp-metadata]: try to find an IDP label for ${idp} , to the EC ${ec.unitid}`);
-
-    ec.libelle_idp = idpList.get(idp) || 'sans objet';
-  }
 };
