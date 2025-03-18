@@ -13,7 +13,6 @@ const xmlParseOption = {
 };
 
 const oneDay = 24 * 60 * 60 * 1000;
-let lastRefresh = Date.now();
 let idpList;
 
 module.exports = function () {
@@ -33,6 +32,21 @@ module.exports = function () {
 
         idpList = JSON.parse(content);
         resolve();
+      });
+    });
+  }
+
+  /**
+   * Returns whether the local mapping file is outdated or not
+   * @returns {boolean}
+   */
+  function isLocalFileOutdated() {
+    return new Promise((resolve, reject) => {
+      fs.stat(localMappingFile, (err, stat) => {
+        if (err) {
+          return err.code === 'ENOENT' ? resolve(true) : reject(err);
+        }
+        resolve((Date.now() - stat.mtime.getTime()) > oneDay);
       });
     });
   }
@@ -123,26 +137,22 @@ module.exports = function () {
    * Check if the IDP mapping must be updated and update it if necessary (max once a day)
    * @returns {Promise<void>}
    */
-  function checkUpdate() {
-    return new Promise((resolve, reject) => {
-  const promiseIdP = new Promise((resolve, reject) => {
-
-    if (idpList && ((Date.now() - lastRefresh) < oneDay)) { return resolve(); }
-      if (idpList && ((Date.now() - lastRefresh) < oneDay)) {
-        return resolve();
+  function checkForUpdate() {
+    return isLocalFileOutdated().then((isOutdated) => {
+      if (!isOutdated) {
+        logger.info('[idp-metadata]: local mapping file is up-to-date');
+        return;
       }
 
-      logger.info('[idp-metadata]: reloading mapping...');
+      logger.info('[idp-metadata]: local mapping file is outdated, reloading...');
 
-      updateIDPList()
+      return updateIDPList()
         .then(() => {
-          lastRefresh = Date.now();
           logger.info('[idp-metadata]: mapping reloaded');
-          resolve();
         })
         .catch((err) => {
           logger.error(`[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : ${err}`);
-          reject(err);
+          return Promise.reject(err);
         });
     });
   }
@@ -154,7 +164,7 @@ module.exports = function () {
    */
   function init() {
     if (idpList) {
-      return checkUpdate();
+      return checkForUpdate();
     }
 
     return loadLocalFile()
@@ -168,7 +178,7 @@ module.exports = function () {
           logger.error(`[idp-metadata]: Failed to load local mapping file`, err);
         }
       })
-      .finally(checkUpdate);
+      .finally(checkForUpdate);
   }
 
   return init()
