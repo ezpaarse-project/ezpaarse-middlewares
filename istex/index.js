@@ -92,7 +92,9 @@ module.exports = function () {
     }
 
     if (/ezpaarse/i.test(ec['user-agent']) || /ezpaarse/i.test(ec.sid)) {
-      return next(new Error('ec ezpaarse'));
+      const err = new Error('irrelevant EC');
+      err.type = 'EIRRELEVANT';
+      return next(err);
     }
 
     buffer.push([ec, next]);
