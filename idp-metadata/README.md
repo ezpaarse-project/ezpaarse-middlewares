@@ -16,7 +16,7 @@ You can add or remove idp-metadata by default to all your enrichments, provided 
 
 ### ezPAARSE process interface
 
-You can use thesesfr for an enrichment process. You just add the middleware
+You can use idp-metadata for an enrichment process. You just add the middleware
 
 ### ezp
 

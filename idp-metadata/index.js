@@ -1,128 +1,190 @@
 'use strict';
 
-const co = require('co');
+const path = require('path');
+const fs = require('fs');
 const request = require('request');
-const { bufferedProcess, wait } = require('../utils.js');
-const xmlMapping = require('xml-mapping')
+const { XMLParser } = require('fast-xml-parser');
+
+const localMappingFile = path.resolve(__dirname, 'idps.json');
+
+const xmlParseOption = {
+  alwaysCreateTextNode: true,
+  ignoreAttributes: false,
+};
 
 const oneDay = 24 * 60 * 60 * 1000;
-let lastRefresh = Date.now();
-let list_idp;
+let idpList;
 
 module.exports = function () {
-    const logger = this.logger;
-    const report = this.report;
-    const req = this.request;
+  const logger = this.logger;
 
-    logger.info('Initializing ABES idp-metadata middleware');
+  logger.info('Initializing ABES idp-metadata middleware');
 
-    // Maximum number of Theses or Persons to query
-    let packetSize = parseInt(req.header('idp-metadata-packet-size'));
-    // Minimum number of ECs to keep before resolving them
-    let bufferSize = parseInt(req.header('idp-metadata-buffer-size'));
-    if (isNaN(packetSize)) { packetSize = 100; } //Default : 50
-    if (isNaN(bufferSize)) { bufferSize = 1000; } //Default : 1000
+  /**
+   * Load the local IDP mapping file
+   *
+   * @returns {Promise<void>}
+   */
+  function loadLocalFile() {
+    return new Promise((resolve, reject) => {
+      fs.readFile(localMappingFile, (err, content) => {
+        if (err) { return reject(err); }
 
-    report.set('idp-metadata', 'idp-metadata-queries', 0);
-    report.set('idp-metadata', 'idp-metadata-query-fails', 0);
-    report.set('idp-metadata', 'idp-metadata-cache-fails', 0);
-
-    const process = bufferedProcess(this, {
-        packetSize,
-        bufferSize,
-        /**
-         * Filter ECs that should be enriched
-         * @param {Object} ec
-         * @returns {Boolean|Promise} true if the EC as an unitid, false otherwise
-         */
-        filter: ec => !!ec?.unitid,
-        onPacket: co.wrap(onPacket)
+        idpList = JSON.parse(content);
+        resolve();
+      });
     });
+  }
 
-    //Chargement du mapping par fichier (list_idp.xml)
-    function chargeMapping(nomFichier, resolve, reject){
-        fs.readFile(path.resolve(__dirname, nomFichier), 'utf8', (err, content) => {
-            if (err) {
-                return reject(err);
-            }
+  /**
+   * Returns whether the local mapping file is outdated or not
+   * @returns {boolean}
+   */
+  function isLocalFileOutdated() {
+    return new Promise((resolve, reject) => {
+      fs.stat(localMappingFile, (err, stat) => {
+        if (err) {
+          return err.code === 'ENOENT' ? resolve(true) : reject(err);
+        }
+        resolve((Date.now() - stat.mtime.getTime()) > oneDay);
+      });
+    });
+  }
 
-            try {
-                logger.info('[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : load file '+nomFichier+' OK');
-                return resolve(content);
-            } catch (e) {
-                return reject(e);
-            }
+  /**
+   * Takes the XML string of a metadata file and returns a map
+   * that match IDP URL with the french display name
+   * @param {string} xmlString
+   * @returns {Object}
+   */
+  function getMappingFromXML(xmlString) {
+    const parser = new XMLParser(xmlParseOption);
+    const metadata = parser.parse(xmlString);
+    const entities = metadata['md:EntitiesDescriptor']['md:EntityDescriptor']
+
+    return Object.fromEntries(
+      entities
+        .filter((entity) => (entity && entity['@_entityID']))
+        .map((entity) => {
+          const entityID = entity['@_entityID'];
+          const displayNames =
+            entity['md:IDPSSODescriptor']
+            && entity['md:IDPSSODescriptor']['md:Extensions']
+            && entity['md:IDPSSODescriptor']['md:Extensions']['mdui:UIInfo']
+            && entity['md:IDPSSODescriptor']['md:Extensions']['mdui:UIInfo']['mdui:DisplayName'];
+
+          let displayName;
+
+          if (Array.isArray(displayNames)) {
+            const labelNode = displayNames.find((displayName) => displayName['@_xml:lang'] === 'fr');
+            displayName = labelNode && labelNode['#text'];
+          }
+          return [entityID, displayName];
+        })
+    );
+  }
+
+  /**
+   * Fetch the latest IDP XML from Renater and update the mapping file
+   * @return {Promise<void>}
+   */
+  function updateIDPList() {
+    const optionsIdP = {
+      method: 'GET',
+      uri: `https://pub.federation.renater.fr/metadata/renater/main/main-idps-renater-metadata.xml`
+    };
+
+    return new Promise((resolve, reject) => {
+      request(optionsIdP, (errIdP, responseIdP, resultIdP) => {
+        if (errIdP || responseIdP.statusCode !== 200) {
+          return reject(errIdP || new Error(`Got unexpected status code ${responseIdP.statusCode}`));
+        }
+
+        idpList = getMappingFromXML(resultIdP);
+
+        fs.writeFile(localMappingFile, JSON.stringify(idpList, null, 2), (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
         });
+      });
+    });
+  }
+
+  /**
+   * Enrich an EC using the result of a query
+   * @param {Object} ec the EC to be enriched
+   * @param {Function} next the function to call when the EC process is over
+   */
+  function process(ec, next) {
+    if (!ec || !ec.unitid) { return next(); }
+
+    const idp = ec['Shib-Identity-Provider'];
+
+    if (idp) {
+      logger.info(`[idp-metadata]: try to find an IDP label for ${idp} , to the EC ${ec.unitid}`);
+      ec.libelle_idp = idpList[idp] || 'sans objet';
+    } else {
+      ec.libelle_idp = 'sans objet';
     }
 
+    next();
+  }
 
+  /**
+   * Check if the IDP mapping must be updated and update it if necessary (max once a day)
+   * @returns {Promise<void>}
+   */
+  function checkForUpdate() {
+    return isLocalFileOutdated().then((isOutdated) => {
+      if (!isOutdated) {
+        logger.info('[idp-metadata]: local mapping file is up-to-date');
+        return;
+      }
 
-    const promiseIdP = new Promise((resolveIdP, rejectIdP) => {
+      logger.info('[idp-metadata]: local mapping file is outdated, reloading...');
 
-        if (list_idp && ((Date.now() - lastRefresh) < oneDay)) { return resolveIdP(list_idp); }
-
-        logger.info('[idp-metadata]: mapping reload');
-
-        //Chargement du mapping par appel au web service Renater
-        const optionsIdP = {
-            method: 'GET',
-            uri: `https://pub.federation.renater.fr/metadata/renater/main/main-idps-renater-metadata.xml`
-        };
-
-        request(optionsIdP, (errIdP, responseIdP, resultIdP) => {
-            //Si erreur, chargement du fichier list_idp.xml, a la place
-            if (errIdP || responseIdP.statusCode !== 200) {
-                chargeMapping('list_idp.xml', resolveIdP, rejectIdP);
-            };
-
-            lastRefresh = Date.now();
-            //Transformation du fichier de metadonnees XML en JSON
-            resolveIdP(xmlMapping.tojson(resultIdP));
+      return updateIDPList()
+        .then(() => {
+          logger.info('[idp-metadata]: mapping reloaded');
+        })
+        .catch((err) => {
+          logger.error(`[idp-metadata]: Fail to request main-idps-renater-metadata.xml from web service : ${err}`);
+          return Promise.reject(err);
         });
     });
+  }
 
-    return new Promise(function (resolve, reject) {
-        Promise.all([promiseIdP])
-            .then((promises) => {
-                list_idp = promises[0];
-                resolve(process);
-            })
-            .catch(function(err) {
-                logger.error(`[idp-metadata]: fail to load the mapping : ${err}`);
-                return reject(new Error('[idp-metadata]: fail to load the mapping'));
-            });
+  /**
+   * Initialize the process
+   * Load the local mapping file if it exists, otherwise check for updates
+   * @returns {Promise<void>}
+   */
+  function init() {
+    if (idpList) {
+      return checkForUpdate();
+    }
+
+    return loadLocalFile()
+      .then(() => {
+        logger.info(`[idp-metadata]: local mapping file loaded`);
+      })
+      .catch((err) => {
+        if (err.code === 'ENOENT') {
+          logger.error(`[idp-metadata]: Local mapping file not found`);
+        } else {
+          logger.error(`[idp-metadata]: Failed to load local mapping file`, err);
+        }
+      })
+      .finally(checkForUpdate);
+  }
+
+  return init()
+    .then(() => process)
+    .catch((err) => {
+      logger.error(`[idp-metadata]: fail to load the mapping`, err);
+      throw err;
     });
-
-    /**
-     * Process a packet of ECs
-     * @param {Array<Object>} ecs
-     * @param {Map<String, Set<String>>} groups
-     */
-    function* onPacket({ ecs }) {
-        if (ecs.length === 0) { return; }
-        for (const [ec, done] of ecs) {
-            enrichEc(ec)
-            done();
-        }
-    }
-
-    /**
-     * Enrich an EC using the result of a query
-     * @param {Object} ec the EC to be enriched
-     * @param {Object} result the document used to enrich the EC
-     */
-    function enrichEc(ec) {
-        if(ec['Shib-Identity-Provider']) {
-            logger.info(`[idp-metadata]: try to find an IDP label for ${ec['Shib-Identity-Provider']} , to the EC ${ec.unitid}`);
-            const etab = list_idp.md$EntitiesDescriptor.md$EntityDescriptor.find((entityDescriptor) => entityDescriptor.entityID === ec['Shib-Identity-Provider']);
-            ec.libelle_idp = "";
-            if (etab) {
-                const info = etab.md$IDPSSODescriptor.md$Extensions.mdui$UIInfo;
-                ec.libelle_idp = info.mdui$DisplayName.find((displayName) => displayName.xml$lang === "fr")?.$t;
-            }
-        }
-        if (!ec.libelle_idp) {
-            ec.libelle_idp = "sans objet"
-        }
-    }
 };
