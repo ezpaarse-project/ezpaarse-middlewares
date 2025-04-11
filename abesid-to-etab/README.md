@@ -12,6 +12,8 @@ Add information about institution with abesID
 
 abesid-to-etab enrichment middleware needs abes-id.
 
+You need to add Etablissements.csv here
+
 **You must use abesid-to-etab after filter, parser, deduplicator middleware.**
 
 ## Headers

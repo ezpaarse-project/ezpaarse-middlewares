@@ -34,6 +34,8 @@ module.exports = function () {
   let rangeIPs = {};
 
 
+  // TODO 2025-04-11: fetch file from Inist Gitlab
+
   return new Promise((resolve, reject) => {
     simpleIPs = listIP.ips.reduce((acc, { ip, _id }) => {
       acc[ip] = _id;
