@@ -17,7 +17,7 @@ ip-to-abesid enrichment middleware needs ip in ec.
 ## Headers
 
 + **ip-to-abesid-source-field** : Fields in the ec for enrichment. "ip" by default.
-+ **ip-to-abesid-enriched-field** : Enriched fields in the CE. "abes-id" by default
++ **ip-to-abesid-enriched-field** : Enriched fields in the EC. "abes-id" by default
 
 ### Example
 
