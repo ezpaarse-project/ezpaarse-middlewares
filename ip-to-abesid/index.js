@@ -74,7 +74,7 @@ function parseCSVToJSON (filePath) {
 
     parser.on('end', () => {
       results = results.map((res) => {
-        return { ip: res['IP validees'], idabes: res['Identifiant Abes'] };
+        return { ip: res['IP'], idabes: res['ID Etablissement'] };
       });
 
       let rangeIPs = {};
