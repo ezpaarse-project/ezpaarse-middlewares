@@ -16,7 +16,8 @@ const fields = [
   'genre',
   'host',
   'doi',
-  'arkIstex'
+  'arkIstex',
+  'accessCondition'
 ];
 
 
