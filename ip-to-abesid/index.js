@@ -1,112 +1,28 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const { parse } = require('csv-parse');
 
-/**
- * Return ABES ID if ip is in range
- *
- * @param {string} ip ip of ec
- * @param {Array} ranges Range IP with their id-abes
- * [[ '127.1.100-150.0-256', 'ABES1234'], [ '127.1.50-100.0-256', 'ABES5678']]
- *
- * @returns ABES ID
- */
-function getAbesIDFromIp(ip, ranges) {
-  const [ipBlock1, ipBlock2, ipBlock3, ipBlock4] = ip.split('.');
+const listIP = require('./autorisation-abes.json');
 
-  const ipBase = `${ipBlock1}.${ipBlock2}`;
-  for (const [range, ibabes] of ranges) {
-    // 127.0.100-110.0-256
-    if (!range) {
-      continue;
-    }
-    const suffix = range.split(`${ipBase}.`)[1];
-    if (!suffix) {
-      continue;
-    }
-    // rangeBlock3: 100-110
-    // rangeBlock4: 0-256
-    const [rangeBlock3, rangeBlock4] = suffix.split('.');
-    if (rangeBlock3.includes('-')) {
-      // inf3: 100
-      // supp3: 110
-      const [inf3, supp3] = rangeBlock3.split('-');
-      if (ipBlock3 >= inf3 || ipBlock3 <= supp3) {
-        if (rangeBlock4.includes('-')) {
-          // inf4: 0
-          // supp4: 256
-          const [inf4, supp4] = rangeBlock4.split('-');
-          if (ipBlock4 >= inf4 || ipBlock4 <= supp4) {
-            return ibabes;
-          }
-        }
-      }
-    } else {
-      if (rangeBlock3 === ipBlock3) {
-        const [inf4, supp4] = rangeBlock4.split('-');
-        if (ipBlock4 >= inf4 || ipBlock4 <= supp4) {
-          return ibabes;
-        }
-      }
+function ipToNumber(ip) {
+  return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0);
+}
+
+function findMatchingRangeId(ip, ipRanges) {
+  const ipNum = ipToNumber(ip);
+
+  for (const range of ipRanges) {
+    const fromNum = ipToNumber(range.from);
+    const toNum = ipToNumber(range.to);
+    if (ipNum >= fromNum && ipNum <= toNum) {
+      return range._id;
     }
   }
 
   return null;
 }
 
-function parseCSVToJSON (filePath) {
-  return new Promise((resolve, reject) => {
-    let results = [];
-
-    const parser = fs.createReadStream(filePath).pipe(
-      parse({
-        columns: (header) => header.map((h) => h.trim()),
-        delimiter: ';',
-        skip_empty_lines: true,
-      })
-    );
-
-    parser.on('data', (row) => {
-      results.push(row);
-    });
-
-    parser.on('end', () => {
-      results = results.map((res) => {
-        return { ip: res['IP'], idabes: res['ID Etablissement'] };
-      });
-
-      let rangeIPs = {};
-      let simpleIPs = {};
-
-      results.forEach((res) => {
-        let ids = res.ip.split(',');
-        ids.forEach((id) => {
-          id = id.trim();
-          if (id.includes('-') && !id.includes(':')) {
-            rangeIPs[id] = res.idabes;
-          } else {
-            simpleIPs[id] = res.idabes;
-          }
-        });
-      });
-
-
-      resolve({ simpleIPs, rangeIPs });
-    });
-
-    parser.on('error', (err) => {
-      reject(err);
-    });
-  });
-}
-
 module.exports = function () {
   const req = this.request;
-  const logger = this.logger;
-
-
 
   let sourceField = req.header('ip-to-abesid-source-field');
   let enrichedField = req.header('ip-to-abesid-enriched-field');
@@ -114,26 +30,20 @@ module.exports = function () {
   if (!sourceField) { sourceField = 'ip'; }
   if (!enrichedField) { enrichedField = 'abes-id'; }
 
-  const abesFilePath = path.resolve(__dirname, 'Etablissements.csv');
-
   let simpleIPs = {};
   let rangeIPs = {};
 
 
   return new Promise((resolve, reject) => {
-    parseCSVToJSON(abesFilePath)
-      .then((jsonData) => {
-        simpleIPs = jsonData.simpleIPs;
-        rangeIPs = jsonData.rangeIPs;
-        logger.info('[ip-to-abesid]: Successfully read CSV File');
-        resolve(process);
-      })
-      .catch((err) => {
-        logger.error('[ip-to-abesid]: Cannot read CSV File', err);
-        this.job._stop(err);
-        reject(err);
-      });
+    simpleIPs = listIP.ips.reduce((acc, { ip, _id }) => {
+      acc[ip] = _id;
+      return acc;
+    }, {});
+
+    rangeIPs = listIP.ipRanges;
+    resolve(process);
   });
+
 
 
   function process(ec, next) {
@@ -151,12 +61,9 @@ module.exports = function () {
     if (!match) {
       return next();
     }
-    const ipBase = match[1];
 
-    const matchRange = Object.entries(rangeIPs)
-      .filter(([key]) => key.startsWith(ipBase));
 
-    const result = getAbesIDFromIp(ec[sourceField], matchRange);
+    const result = findMatchingRangeId(ec[sourceField], rangeIPs);
 
     if (result) {
       ec[enrichedField] = result;
