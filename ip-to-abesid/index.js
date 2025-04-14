@@ -1,7 +1,7 @@
 'use strict';
 
-
-const listIP = require('./autorisation-abes.json');
+const fs = require('fs');
+const path = require('path');
 
 function ipToNumber(ip) {
   return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet, 10), 0);
@@ -37,13 +37,16 @@ module.exports = function () {
   // TODO 2025-04-11: fetch file from Inist Gitlab
 
   return new Promise((resolve, reject) => {
-    simpleIPs = listIP.ips.reduce((acc, { ip, _id }) => {
-      acc[ip] = _id;
-      return acc;
-    }, {});
-
-    rangeIPs = listIP.ipRanges;
-    resolve(process);
+    fs.readFile(path.resolve(__dirname, 'autorisation-abes.json'), 'utf-8', (err, data) => {
+      if (err) { reject('[ip-to-abesid]: Cannot read file'); }
+      const listIP = JSON.parse(data);
+      simpleIPs = listIP.ips.reduce((acc, { ip, _id }) => {
+        acc[ip] = _id;
+        return acc;
+      }, {});
+      rangeIPs = listIP.ipRanges;
+      resolve(process);
+    });
   });
 
 
