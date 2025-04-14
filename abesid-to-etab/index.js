@@ -38,8 +38,8 @@ module.exports = function () {
   const logger = this.logger;
 
   const sourceField = req.header('abesid-to-etab-source-field') || 'abes-id';
-  const enrichedField = req.header('abesid-to-etab-enriched-field') || 'institutionName';
 
+  const enrichedField = req.header('abesid-to-etab-enriched-field') || 'institutionName';
 
   let institutions = {};
 

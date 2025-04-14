@@ -11,7 +11,6 @@ Add information about institution with abesID.
 ## Prerequisites
 
 abesid-to-etab enrichment middleware needs abes-id.
-
 You need to find the file Etablissement.csv on Inist Gitlab on Istex repo and put at the folder of this middleware.
 
 **You must use abesid-to-etab after filter, parser, deduplicator middleware.**
