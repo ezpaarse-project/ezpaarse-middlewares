@@ -28,7 +28,7 @@ const parseCSVToJSON = (filePath) => {
     });
 
     parser.on('error', (err) => {
-      reject(err);
+      return reject(err);
     });
   });
 };
@@ -50,12 +50,12 @@ module.exports = function () {
       .then((jsonData) => {
         institutions = jsonData;
         logger.info('[abesid-to-etab]: Successfully read CSV File');
-        resolve(process);
+        return resolve(process);
       })
       .catch((err) => {
         logger.error('[abesid-to-etab]: Cannot read CSV File', err);
         this.job._stop(err);
-        reject(err);
+        return reject(err);
       });
   });
 
