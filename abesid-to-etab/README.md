@@ -1,47 +1,26 @@
 # abesid-to-etab
 
-Add information about institution with abesID
+Add information about institution with abesID.
 
 ## Enriched fields
 
 | Name | Type | Description |
 | --- | --- | --- |
-| siren | String | IDP. |
 | institutionName | String | Name of institution. |
-| institutionType | String | Type of institution. |
-| institutionAddress | String | Postal address of institution. |
-| institutionCity | String | City of institution. |
-| institutionPhone | String | Phone of institution. |
-| institutionContact | String | Contact of institution. |
-| institutionEmail | String | Contact email of institution. |
-| institutionIpRange | String | IP range of institution. |
 
 ## Prerequisites
 
 abesid-to-etab enrichment middleware needs abes-id.
+You need to find the file Etablissement.csv on Inist Gitlab on Istex repo and put at the folder of this middleware.
 
 **You must use abesid-to-etab after filter, parser, deduplicator middleware.**
 
 ## Headers
 
 + **abesid-to-etab-source-field** : Fields in the ec for enrichment. "abes-id" by default.
-+ **abesid-to-etab-enriched-fields** : Enriched fields in the CE.
-```json
-{
-  "Siren": "siren",
-  "Nom de l'etablissement": "institutionName",
-  "Type de l'etablissement": "institutionType",
-  "Adresse de l'etablissement": "institutionAddress",
-  "Ville": "institutionCity",
-  "Telephone contact": "institutionPhone",
-  "Nom et prenom contact": "institutionContact",
-  "Adresse mail contact": "institutionEmail",
-  "IP validees": "institutionIpRange"
-}
++ **abesid-to-etab-enriched-field** : Enriched field in the EC. "institutionName" by default.
 ```
 By default.
-Example : "<Field in csv file>": "<Field in EC>"
-Is not recommended to update field in csv file.
 
 ### Example
 

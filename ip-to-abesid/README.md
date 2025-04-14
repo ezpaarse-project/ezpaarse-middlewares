@@ -12,12 +12,14 @@ Add ABES-ID based on IP.
 
 ip-to-abesid enrichment middleware needs ip in ec.
 
+You need to find the file autorisation-abes.json on Inist Gitlab on Istex repo and put at the folder of this middleware.
+
 **You must use ip-to-abesid after filter, parser, deduplicator middleware.**
 
 ## Headers
 
 + **ip-to-abesid-source-field** : Fields in the ec for enrichment. "ip" by default.
-+ **ip-to-abesid-enriched-field** : Enriched fields in the CE. "abes-id" by default
++ **ip-to-abesid-enriched-field** : Enriched fields in the EC. "abes-id" by default
 
 ### Example
 

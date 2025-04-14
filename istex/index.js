@@ -16,7 +16,8 @@ const fields = [
   'genre',
   'host',
   'doi',
-  'arkIstex'
+  'arkIstex',
+  'accessCondition'
 ];
 
 
@@ -193,7 +194,8 @@ module.exports = function () {
         }
 
         for (const item of list) {
-          if (item.id) {
+
+          if (item.id && !results.has(item.id)) {
             results.set(item.id, item);
 
             try {
@@ -203,7 +205,7 @@ module.exports = function () {
             }
           }
 
-          if (item.arkIstex) {
+          if (item.arkIstex && !results.has(item.arkIstex)) {
             results.set(item.arkIstex, item);
 
             try {

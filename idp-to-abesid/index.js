@@ -64,7 +64,8 @@ module.exports = function () {
   });
 
   function process(ec, next) {
-    if (!ec || ec.auth !== 'fede' || !ec[sourceField] || ec[enrichedField]) { return next(); }
+    if (!ec || !ec[sourceField]) { return next(); }
+
 
     if (idsAbes[ec[sourceField]]) {
       ec[enrichedField] = idsAbes[ec[sourceField]];
