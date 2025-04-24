@@ -41,7 +41,7 @@ module.exports = function () {
   const sourceField = req.header('abesid-to-etab-source-field') || 'abes-id';
 
   const enrichedField = req.header('abesid-to-etab-enriched-field') || 'institutionName';
-  const filenameField = req.header('abesid-to-etab-filename-field') || 'Etablissements.csv';
+  const filenameField = req.header('abesid-to-etab-filename') || 'Etablissements.csv';
 
   let institutions = {};
 

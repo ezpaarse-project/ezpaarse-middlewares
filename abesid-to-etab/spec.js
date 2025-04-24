@@ -14,7 +14,7 @@ const ecs = [
 describe('abesid-to-etab', () => {
   it('Should enrich institution info with "abes-id" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
-      ctx.request.headers['abesid-to-etab-filename-field'] = 'test.csv';
+      ctx.request.headers['abesid-to-etab-filename'] = 'test.csv';
     });
     const ec = ecs[0];
     process(ec, () => {});
@@ -24,7 +24,7 @@ describe('abesid-to-etab', () => {
 
   it('Should enrich institution info with "login" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
-      ctx.request.headers['abesid-to-etab-filename-field'] = 'test.csv';
+      ctx.request.headers['abesid-to-etab-filename'] = 'test.csv';
       ctx.request.headers['abesid-to-etab-source-field'] = 'login';
     });
     const ec = ecs[1];
@@ -35,7 +35,7 @@ describe('abesid-to-etab', () => {
 
   it('Should enrich "custom id" with "login" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
-      ctx.request.headers['abesid-to-etab-filename-field'] = 'test.csv';
+      ctx.request.headers['abesid-to-etab-filename'] = 'test.csv';
       ctx.request.headers['abesid-to-etab-source-field'] = 'login';
       ctx.request.headers['abesid-to-etab-enriched-field'] = 'custom-id';
     });
@@ -47,7 +47,7 @@ describe('abesid-to-etab', () => {
 
   it('Should enrich institution info with "abes-id" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
-      ctx.request.headers['abesid-to-etab-filename-field'] = 'test.csv';
+      ctx.request.headers['abesid-to-etab-filename'] = 'test.csv';
     });
     const ec = ecs[2];
     process(ec, () => {});
