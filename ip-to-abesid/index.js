@@ -26,9 +26,11 @@ module.exports = function () {
 
   let sourceField = req.header('ip-to-abesid-source-field');
   let enrichedField = req.header('ip-to-abesid-enriched-field');
+  let filenameField = req.header('ip-to-abesid-filename');
 
   if (!sourceField) { sourceField = 'ip'; }
   if (!enrichedField) { enrichedField = 'abes-id'; }
+  if (!filenameField) { filenameField = 'autorisation-abes.json'; }
 
   let simpleIPs = {};
   let rangeIPs = {};
@@ -37,7 +39,7 @@ module.exports = function () {
   // TODO 2025-04-11: fetch file from Inist Gitlab
 
   return new Promise((resolve, reject) => {
-    fs.readFile(path.resolve(__dirname, 'autorisation-abes.json'), 'utf-8', (err, data) => {
+    fs.readFile(path.resolve(__dirname, filenameField), 'utf-8', (err, data) => {
       if (err) { reject('[ip-to-abesid]: Cannot read file'); }
       const listIP = JSON.parse(data);
       simpleIPs = listIP.ips.reduce((acc, { ip, _id }) => {
