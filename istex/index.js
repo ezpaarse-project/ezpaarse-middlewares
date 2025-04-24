@@ -16,7 +16,8 @@ const fields = [
   'genre',
   'host',
   'doi',
-  'arkIstex'
+  'arkIstex',
+  'accessCondition'
 ];
 
 
@@ -92,7 +93,9 @@ module.exports = function () {
     }
 
     if (/ezpaarse/i.test(ec['user-agent']) || /ezpaarse/i.test(ec.sid)) {
-      return next(new Error('ec ezpaarse'));
+      const err = new Error('irrelevant EC');
+      err.type = 'EIRRELEVANT';
+      return next(err);
     }
 
     buffer.push([ec, next]);
@@ -191,7 +194,8 @@ module.exports = function () {
         }
 
         for (const item of list) {
-          if (item.id) {
+
+          if (item.id && !results.has(item.id)) {
             results.set(item.id, item);
 
             try {
@@ -201,7 +205,7 @@ module.exports = function () {
             }
           }
 
-          if (item.arkIstex) {
+          if (item.arkIstex && !results.has(item.arkIstex)) {
             results.set(item.arkIstex, item);
 
             try {
@@ -311,8 +315,14 @@ module.exports = function () {
       genre,
       host,
       doi,
-      arkIstex
+      arkIstex,
+      accessCondition,
     } = result;
+
+    if (accessCondition) {
+      ec['access_type'] = accessCondition.contentType;
+      ec['oa_status'] = accessCondition.value;
+    }
 
     if (corpusName) {
       ec['publisher_name'] = corpusName;
