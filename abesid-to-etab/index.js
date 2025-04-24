@@ -28,6 +28,7 @@ const parseCSVToJSON = (filePath) => {
     });
 
     parser.on('error', (err) => {
+      console.error('[abesid-to-etab]: Cannot read CSV File', err);
       return reject(err);
     });
   });
@@ -40,10 +41,11 @@ module.exports = function () {
   const sourceField = req.header('abesid-to-etab-source-field') || 'abes-id';
 
   const enrichedField = req.header('abesid-to-etab-enriched-field') || 'institutionName';
+  const filenameField = req.header('abesid-to-etab-filename') || 'Etablissements.csv';
 
   let institutions = {};
 
-  const filePath = path.resolve(__dirname, 'Etablissements.csv');
+  const filePath = path.resolve(__dirname, filenameField);
 
   return new Promise((resolve, reject) => {
     parseCSVToJSON(filePath)
