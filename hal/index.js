@@ -222,7 +222,6 @@ module.exports = function () {
           try {
             docs = yield queryHal(Array.from(packet.identifiants), Array.from(packet.docids));
           } catch (e) {
-            self.logger.error(methal);
             self.logger.error(`hal: ${e.message}`);
           }
 
