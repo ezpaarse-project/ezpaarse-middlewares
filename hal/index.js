@@ -524,17 +524,19 @@ module.exports = function () {
       let toreturn;
       try {
         // On cache à la fois la correspondance ID=>Name et Name=>ID
-	for (var site of tocache) {
-	  let url = site.url.replace(/https?:\\?\/\\?\//, '');
+        for (var site of tocache) {
+          let url = site.url.replace(/https?:\\?\/\\?\//, '');
+
           yield cacheResult(site.id.toString(), url);
           yield cacheResult(url, site.id.toString());
+
           if (sitename == site.id.toString()) {
             toreturn = site.url;
-	  }
+          }
           if (sitename == site.url) {
             toreturn = site.id;
-	  }
-        };
+          }
+        }
       } catch (e) {
         report.inc('general', 'hal-cache-fail');
       }
