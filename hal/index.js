@@ -373,11 +373,11 @@ module.exports = function () {
     return co(function* () {
       if (!sidDepot) { return false; }
 
-      const sidDomain = yield getSite(ec.domain, 'id');
+      const sidDomain = yield getSite(ec.domain);
 
       if (ec.hal_redirection === true) {
         ec['hal_endpoint_portail_sid'] = sidDepot;
-        ec['hal_endpoint_portail'] = yield getSite(sidDepot, 'url');
+        ec['hal_endpoint_portail'] = yield getSite(sidDepot);
       }
 
       if (ec.hal_redirection === true && !ec.hal_consult_collection && sidDomain == sidDepot) {
@@ -482,11 +482,10 @@ module.exports = function () {
   }
 
 
-  function getSite(sitename, returnParam) {
+  function getSite(sitename) {
     return co(function* () {
 
       // Récupération du sid ou nom dans le cache si possible
-      let sitetofind = sitename.toString().replace(/https?:\/\//, '');
       let cachedParam = yield checkCache(sitename.toString().replace('/https?:\/\//', ''));
 
       if (cachedParam) {
