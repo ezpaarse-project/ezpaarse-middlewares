@@ -286,15 +286,18 @@ module.exports = function () {
 
       // The entire object can be pretty big
       // We only cache what we need to limit memory usage
-      const cached = {
-        publicationDate: item.publicationDate,
-        copyrightDate: item.copyrightDate,
-        corpusName: item.corpusName,
-        language: item.language,
-        genre: item.genre,
-        host: item.host,
-        doi: item.doi
-      };
+      let cached = {};
+      if (Object.keys(item).length > 0) {
+        cached = {
+          publicationDate: item.publicationDate,
+          copyrightDate: item.copyrightDate,
+          corpusName: item.corpusName,
+          language: item.language,
+          genre: item.genre,
+          host: item.host,
+          doi: item.doi
+        };
+      }
 
       cache.set(id, cached, (err, result) => {
         if (err) { return reject(err); }
