@@ -56,11 +56,28 @@ exports.contextify = function (middleware, contextModifier) {
   return middleware.call(ctx);
 };
 
-function cache(collectionName) {
-  const items = new Map();
+/** @type {Map<string, Map<string, any>>} */
+const cacheCollections = new Map();
 
+function cache(collectionName) {
   const cacheObject = {
     collection: null
+  };
+
+  let items = cacheCollections.get(collectionName);
+
+  if (!items) {
+    items = new Map();
+    cacheCollections.set(collectionName, items);
+  }
+
+  cacheObject.count = function (callback) {
+    callback(null, items.size);
+  };
+
+  cacheObject.clear = function (callback) {
+    items.clear();
+    callback();
   };
 
   cacheObject.checkIndexes = function (ttl, callback) {
