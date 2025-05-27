@@ -22,7 +22,7 @@ module.exports = function () {
   const self = this;
   const report = this.report;
   const req = this.request;
-  const activated    = !/^false$/i.test(req.header('hal-enrich'));
+  const activated    = /^true$/i.test(req.header('hal-enrich'));
   const cacheEnabled = !/^false$/i.test(req.header('hal-cache'));
 
   if (!activated) { return function (ec, next) { next(); }; }
