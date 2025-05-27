@@ -222,7 +222,7 @@ module.exports = function () {
             enrichEc(ec, results.get(ec.unitid));
           } else {
             try {
-              cacheResult(ec.unitid, {});
+              yield cacheResult(ec.unitid, {});
             } catch (e) {
               report.inc('general', 'istex-cache-fail');
             }
