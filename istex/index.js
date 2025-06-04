@@ -33,7 +33,7 @@ module.exports = function () {
 
   if (!activated) { return function (ec, next) { next(); }; }
 
-  self.logger.verbose('Istex cache: %s', cacheEnabled ? 'enabled' : 'disabled');
+  self.logger.info('Istex cache: %s', cacheEnabled ? 'enabled' : 'disabled');
 
   // Time-to-live of cached documents
   const ttl = parseInt(req.header('istex-ttl')) || 3600 * 24 * 7;
@@ -257,7 +257,7 @@ module.exports = function () {
       subQueries.push(`arkIstex:("${arks.join('" OR "')}")`);
     }
 
-    const size = subQueries.length;
+    const size = istexIds.length + arks.length;
     const output = fields.join(',');
     const q = subQueries.join(' OR ');
 
