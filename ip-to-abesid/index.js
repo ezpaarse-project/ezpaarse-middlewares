@@ -33,25 +33,37 @@ module.exports = function () {
   if (!filenameField) { filenameField = 'autorisation-abes.json'; }
 
   let simpleIPs = {};
-  let rangeIPs = {};
-
+  let rangeIPs = [];
 
   // TODO 2025-04-11: fetch file from Inist Gitlab
 
   return new Promise((resolve, reject) => {
     fs.readFile(path.resolve(__dirname, filenameField), 'utf-8', (err, data) => {
-      if (err) { reject('[ip-to-abesid]: Cannot read file'); }
-      const listIP = JSON.parse(data);
-      simpleIPs = listIP.ips.reduce((acc, { ip, _id }) => {
-        acc[ip] = _id;
-        return acc;
-      }, {});
-      rangeIPs = listIP.ipRanges;
-      resolve(process);
+      if (err) { reject(`[ip-to-abesid]: Cannot read file: ${err}`); }
+
+      try {
+        const listIP = JSON.parse(data);
+
+        if (!Array.isArray(listIP.ips)) {
+          reject('[ip-to-abesid]: No ips found in file');
+          return;
+        }
+
+        simpleIPs = listIP.ips.reduce((acc, { ip, _id }) => {
+          acc[ip] = _id;
+          return acc;
+        }, {});
+
+        if (listIP.ipRanges) {
+          rangeIPs = listIP.ipRanges;
+        }
+
+        resolve(process);
+      } catch (error) {
+        reject(`[ip-to-abesid]: Cannot parse ips: ${error}`);
+      }
     });
   });
-
-
 
   function process(ec, next) {
     if (!ec || !ec[sourceField] || ec[enrichedField]) { return next(); }
