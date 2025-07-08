@@ -23,6 +23,7 @@ function findMatchingRangeId(ip, ipRanges) {
 
 module.exports = function () {
   const req = this.request;
+  const logger = this.logger;
 
   let sourceField = req.header('ip-to-abesid-source-field');
   let enrichedField = req.header('ip-to-abesid-enriched-field');
@@ -39,13 +40,18 @@ module.exports = function () {
 
   return new Promise((resolve, reject) => {
     fs.readFile(path.resolve(__dirname, filenameField), 'utf-8', (err, data) => {
-      if (err) { reject(`[ip-to-abesid]: Cannot read file: ${err}`); }
+      if (err) {
+        logger.error('[ip-to-abesid]: Cannot read file');
+        reject(err);
+        return;
+      }
 
       try {
         const listIP = JSON.parse(data);
 
         if (!Array.isArray(listIP.ips)) {
-          reject('[ip-to-abesid]: No ips found in file');
+          logger.error('[ip-to-abesid]: No ips found in file');
+          reject(new Error('No ips found in file'));
           return;
         }
 
@@ -60,7 +66,8 @@ module.exports = function () {
 
         resolve(process);
       } catch (error) {
-        reject(`[ip-to-abesid]: Cannot parse ips: ${error}`);
+        logger.error('[ip-to-abesid]: Cannot parse ips');
+        reject(error);
       }
     });
   });
