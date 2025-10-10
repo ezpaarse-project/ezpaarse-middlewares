@@ -208,11 +208,6 @@ module.exports = function () {
           return reject(new Error(`${response.statusCode} ${response.statusMessage}`));
         }
 
-
-        console.log('dois', dois);
-        console.log('graphqlFields.', graphqlFields.join(','));
-        console.log('body', body);
-
         const result = body && body.data && body.data.unpaywall;
 
         if (!Array.isArray(result)) {
