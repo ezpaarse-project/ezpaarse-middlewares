@@ -16,7 +16,7 @@ const enrichmentFields = {
   'journal_issns': 'issns',
   'journal_issn_l': 'issnl',
   'published_date': 'publication_date',
-  'publisher': 'publisher',
+  'publisher': 'publisher_name',
   'oa_request_date': 'oa_request_date',
 };
 

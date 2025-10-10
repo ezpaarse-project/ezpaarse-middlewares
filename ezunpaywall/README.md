@@ -15,7 +15,7 @@ Fetches [unpaywall](https://www.unpaywall.org/) metadata from [ezunpaywall](http
 | issns | List of ISSN |
 | issnl | linking ISSN |
 | publication_date | Publication date |
-| publisher | Name of publisher |
+| publisher_name | Name of publisher |
 | oa_request_date | Date | Date of open access information. |
 
 ## Prerequisites
