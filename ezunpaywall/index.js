@@ -15,9 +15,9 @@ const enrichmentFields = {
   'updated': 'oa_updated',
   'journal_issns': 'print_identifier',
   'journal_issn_l': 'online_identifier',
-  'oa_request_date': 'oa_request_date',
   'published_date': 'publication_date',
   'publisher': 'publisher',
+  'oa_request_date': 'oa_request_date',
 };
 
 const graphqlFields = Object.keys(enrichmentFields).filter(k => k !== 'oa_request_date');
