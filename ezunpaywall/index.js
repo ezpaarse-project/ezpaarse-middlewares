@@ -14,7 +14,7 @@ const enrichmentFields = {
   'oa_status': 'oa_status',
   'updated': 'oa_updated',
   'journal_issns': 'print_identifier',
-  'journal_issn_l': 'online_identifier',
+  'journal_issn_l': 'issnl',
   'published_date': 'publication_date',
   'publisher': 'publisher',
   'oa_request_date': 'oa_request_date',
