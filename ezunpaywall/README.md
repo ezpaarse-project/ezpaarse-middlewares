@@ -13,6 +13,10 @@ Fetches [unpaywall](https://www.unpaywall.org/) metadata from [ezunpaywall](http
 | oa_status | String | The OA status, or color, of this resource. |
 | updated | String | Time when the data for this resource was last updated. |
 | oa_request_date | Date | Date of open access information. |
+| print_identifier | ISSN |
+| online_identifier | ISBN |
+| published_date | Publication date |
+| publisher | Name of publisher |
 
 ## Prerequisites
 
