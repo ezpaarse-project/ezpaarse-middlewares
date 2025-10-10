@@ -13,7 +13,7 @@ const enrichmentFields = {
   'journal_is_oa': 'journal_is_oa',
   'oa_status': 'oa_status',
   'updated': 'oa_updated',
-  'journal_issns': 'print_identifier',
+  'journal_issns': 'issns',
   'journal_issn_l': 'issnl',
   'published_date': 'publication_date',
   'publisher': 'publisher',

@@ -12,7 +12,7 @@ Fetches [unpaywall](https://www.unpaywall.org/) metadata from [ezunpaywall](http
 | journal_is_oa | Boolean | Is this resource published in a completely OA journal. |
 | oa_status | String | The OA status, or color, of this resource. |
 | updated | String | Time when the data for this resource was last updated. |
-| print_identifier | ISSN |
+| issns | List of ISSN |
 | issnl | linking ISSN |
 | publication_date | Publication date |
 | publisher | Name of publisher |
