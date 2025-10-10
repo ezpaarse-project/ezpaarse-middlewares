@@ -13,7 +13,11 @@ const enrichmentFields = {
   'journal_is_oa': 'journal_is_oa',
   'oa_status': 'oa_status',
   'updated': 'oa_updated',
-  'oa_request_date': 'oa_request_date'
+  'journal_issns': 'print_identifier',
+  'journal_issn_l': 'online_identifier',
+  'oa_request_date': 'oa_request_date',
+  'published_date': 'publication_date',
+  'publisher': 'publisher',
 };
 
 const graphqlFields = Object.keys(enrichmentFields).filter(k => k !== 'oa_request_date');
@@ -176,7 +180,7 @@ module.exports = function () {
         json: true,
         body: {
           query: `{
-            GetByDOI(dois:${JSON.stringify(dois)}) {
+            unpaywall(dois:${JSON.stringify(dois)}) {
               ${graphqlFields.join(',')}
             }
           }`,
@@ -185,6 +189,7 @@ module.exports = function () {
           'x-api-key': req.header('ezunpaywall-api-key'),
         }
       };
+
 
       const now = new Date();
 
@@ -203,7 +208,12 @@ module.exports = function () {
           return reject(new Error(`${response.statusCode} ${response.statusMessage}`));
         }
 
-        const result = body && body.data && body.data.GetByDOI;
+
+        console.log('dois', dois);
+        console.log('graphqlFields.', graphqlFields.join(','));
+        console.log('body', body);
+
+        const result = body && body.data && body.data.unpaywall;
 
         if (!Array.isArray(result)) {
           return reject(new Error('invalid response'));
