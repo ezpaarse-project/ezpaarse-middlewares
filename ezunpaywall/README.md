@@ -16,6 +16,7 @@ Fetches [unpaywall](https://www.unpaywall.org/) metadata from [ezunpaywall](http
 | issnl | linking ISSN |
 | publication_date | Publication date |
 | publisher_name | Name of publisher |
+| type | genre, equivalent to type on crossref |
 | oa_request_date | Date | Date of open access information. |
 
 ## Prerequisites
