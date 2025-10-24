@@ -158,40 +158,50 @@ module.exports = function () {
         const [ec, done] = buffer.shift() || [];
         if (!ec) { return packet; }
 
-        if (!ec.pii && !ec.doi) {
+        let doi;
+        let pii;
+
+        if (typeof ec.doi === 'string' && ec.doi.length > 0) {
+          if (!doiPattern.test(ec.doi)) {
+            report.inc('general', 'crossref-invalid-dois');
+          } else {
+            if (cacheEnabled) {
+              const cachedDoc = yield checkCache(ec.doi);
+
+              if (cachedDoc) {
+                aggregate(cachedDoc, ec);
+                done();
+                continue;
+              }
+            }
+
+            doi = ec.doi;
+          }
+        }
+
+        if (typeof ec.pii === 'string' && ec.pii.length > 0) {
+          if (cacheEnabled) {
+            const cachedDoc = yield checkCache(ec.pii);
+
+            if (cachedDoc) {
+              aggregate(cachedDoc, ec);
+              done();
+              continue;
+            }
+          }
+
+          pii = ec.pii;
+        }
+
+        if (!doi && !pii) {
           done();
           continue;
         }
 
-        if (ec.doi && !doiPattern.test(ec.doi)) {
-          report.inc('general', 'crossref-invalid-dois');
-          done();
-          continue;
-        }
-
-        if (ec.pii && cacheEnabled) {
-          const cachedDoc = yield checkCache(ec.pii);
-
-          if (cachedDoc) {
-            aggregate(cachedDoc, ec);
-            done();
-            continue;
-          }
-        }
-
-        if (ec.doi && cacheEnabled) {
-          const cachedDoc = yield checkCache(ec.doi);
-
-          if (cachedDoc) {
-            aggregate(cachedDoc, ec);
-            done();
-            continue;
-          }
-        }
+        if (doi) { packet.doi.add(doi); }
+        if (pii) { packet['alternative-id'].add(pii); }
 
         packet.ecs.push([ec, done]);
-        if (ec.doi) { packet.doi.add(ec.doi); }
-        if (ec.pii) { packet['alternative-id'].add(ec.pii); }
       }
 
       return packet;
@@ -200,7 +210,7 @@ module.exports = function () {
 
   function checkCache(identifier) {
     return new Promise((resolve, reject) => {
-      if (!identifier) { return resolve(); }
+      if (typeof identifier !== 'string' || !identifier) { return resolve(); }
 
       cache.get(identifier.toLowerCase(), (err, cachedDoc) => {
         if (err) { return reject(err); }
