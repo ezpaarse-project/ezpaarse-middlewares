@@ -24,6 +24,7 @@ Some platforms may have private resources, to obtain enrichments on these platfo
 + **omeka-ttl** : Lifetime of cached documents, in seconds. Defaults to ``7 days (3600 * 24 * 7)``.
 + **omeka-throttle** : Minimum time to wait between queries, in milliseconds. Defaults to ``200``ms.
 + **omeka-base-wait-time** : Time to wait before retrying after a query fails, in milliseconds. Defaults to ``1000``ms. This time ``doubles`` after each attempt.
++ **omeka-request-timeout** : Request timeout, default ``20000`` ms.
 + **omeka-max-tries** : Maximum number of attempts if an enrichment fails. Defaults to ``5``.
 + **omeka-key** : apikey to access private resource metada.
 

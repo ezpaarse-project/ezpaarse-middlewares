@@ -27,6 +27,8 @@ module.exports = function () {
   // Base wait time after a request fails
   let baseWaitTime = parseInt(req.header('omeka-base-wait-time'));
 
+  let requestTimeout = parseInt(req.header('omeka-request-timeout'));
+
   const platform = req.header('omeka-platform');
   if (!platform) {
     const err = new Error('Omeka: no platform are sent');
@@ -48,6 +50,7 @@ module.exports = function () {
   if (isNaN(maxTries)) { maxTries = 5; }
   if (isNaN(throttle)) { throttle = 100; }
   if (isNaN(ttl)) { ttl = 3600 * 24 * 7; }
+  if (isNaN(requestTimeout)) { requestTimeout = 20000; }
 
   if (!cache) {
     const err = new Error('failed to connect to mongodb, cache not available for Omeka');
@@ -175,6 +178,7 @@ module.exports = function () {
       const options = {
         method: 'GET',
         json: true,
+        timeout: requestTimeout,
         uri: ark ? `${baseUrl}/api/items` : `${baseUrl}/api/items/${encodeURIComponent(id)}`,
         qs
       };
