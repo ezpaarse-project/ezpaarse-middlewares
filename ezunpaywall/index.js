@@ -5,7 +5,7 @@ const request = require('request');
 const { bufferedProcess, wait } = require('../utils.js');
 const cache = ezpaarse.lib('cache')('ezunpaywall');
 
-// result field => ec field
+// result field of graphql => ec field
 const enrichmentFields = {
   'journal_name': 'publication_title',
   'is_oa': 'is_oa',
@@ -162,7 +162,9 @@ module.exports = function () {
   function enrichEc(ec, result) {
     Object.entries(enrichmentFields).forEach(([field, ecField]) => {
       if (Object.hasOwnProperty.call(result, field)) {
-        ec[ecField] = result[field];
+        if (result[field] !== null) {
+          ec[ecField] = result[field];
+        }
       }
     });
   }
@@ -238,7 +240,9 @@ module.exports = function () {
 
       Object.keys(enrichmentFields).forEach(field => {
         if (Object.hasOwnProperty.call(item, field)) {
-          cached[field] = item[field];
+          if (item[field] !== null) {
+            cached[field] = item[field];
+          }
         }
       });
 
