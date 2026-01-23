@@ -1,1 +1,10 @@
-{}
+{
+  "headers": [
+    { "name": "openalex-cache" },
+    { "name": "openalex-ttl" },
+    { "name": "openalex-throttle" },
+    { "name": "openalex-paquet-size" },
+    { "name": "openalex-buffer-size" },
+    { "name": "openalex-apikey" }
+  ]
+}
