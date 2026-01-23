@@ -224,7 +224,7 @@ module.exports = function () {
       // The entire object can be pretty big
       // We only cache what we need to limit memory usage
 
-      // TODO optimize size of cash 
+      // TODO optimize size of cache
 
       cache.set(id, item, (err, result) => {
         if (err) { return reject(err); }
