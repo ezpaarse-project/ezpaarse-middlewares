@@ -14,7 +14,6 @@ Fetches [openalex](https://docs.openalex.org/) metadata.
 | journal_is_in_doaj | Boolean | Is this resource published in a DOAJ-indexed journal. |
 | issnl | String | linking ISSN |
 | type | String | genre, equivalent to type on crossref |
-| journal_is_oa | Boolean | Is this resource published in a completely OA journal. |
 | oa_request_date | Date | Date of open access information. |
 
 ## Prerequisites
