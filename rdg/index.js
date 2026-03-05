@@ -5,18 +5,27 @@ const request = require('request');
 const { bufferedProcess, wait } = require('../utils.js');
 const cache = ezpaarse.lib('cache')('rdg');
 
-module.exports = function () {
-  this.logger.verbose('Initializing rdg middleware');
 
-  this.job.outputFields.added.push('publication_title');
+module.exports = function () {
+  this.logger.verbose('Initializing RDG middleware');
 
   const logger = this.logger;
   const report = this.report;
-  const req = this.request;
+  const req    = this.request;
 
   const cacheEnabled = !/^false$/i.test(req.header('rdg-cache'));
 
-  logger.verbose(`rdg cache: ${cacheEnabled ? 'enabled' : 'disabled'}`);
+  logger.verbose(`RDG cache: ${cacheEnabled ? 'enabled' : 'disabled'}`);
+
+  // Strategy to adopt when an enrichment reaches maxTries : abort, ignore, retry
+  let onFail = (req.header('rdg-on-fail') || 'abort').toLowerCase();
+  let onFailValues = ['abort', 'ignore', 'retry'];
+
+  if (onFail && !onFailValues.includes(onFail)) {
+    const err = new Error(`RDG-On-Fail should be one of: ${onFailValues.join(', ')}`);
+    err.status = 400;
+    return err;
+  }
 
   // Time-to-live of cached documents
   let ttl = parseInt(req.header('rdg-ttl'));
@@ -26,17 +35,17 @@ module.exports = function () {
   let packetSize = parseInt(req.header('rdg-packet-size'));
   // Minimum number of ECs to keep before resolving them
   let bufferSize = parseInt(req.header('rdg-buffer-size'));
-  // Maximum number of trials before passing the EC in error
-  let maxAttempts = parseInt(req.header('rdg-max-attempts'));
+  // Maximum enrichment attempts
+  let maxTries = parseInt(req.header('rdg-max-tries'));
 
-  if (isNaN(packetSize)) { packetSize = 1; }
-  if (isNaN(bufferSize)) { bufferSize = 1; }
-  if (isNaN(throttle)) { throttle = 1; }
+  if (isNaN(packetSize)) { packetSize = 10; }
+  if (isNaN(bufferSize)) { bufferSize = 200; }
+  if (isNaN(throttle)) { throttle = 100; }
   if (isNaN(ttl)) { ttl = 3600 * 24 * 7; }
-  if (isNaN(maxAttempts)) { maxAttempts = 5; }
+  if (isNaN(maxTries)) { maxTries = 5; }
 
   if (!cache) {
-    const err = new Error('failed to connect to mongodb, cache not available for rdg');
+    const err = new Error('failed to connect to mongodb, cache not available for RDG');
     err.status = 500;
     return err;
   }
@@ -74,8 +83,8 @@ module.exports = function () {
     // Verify cache indices and time-to-live before starting
     cache.checkIndexes(ttl, function (err) {
       if (err) {
-        logger.error(`rdg: failed to verify indexes : ${err}`);
-        return reject(new Error('failed to verify indexes for the cache of rdg'));
+        logger.error(`RDG: failed to verify indexes : ${err}`);
+        return reject(new Error('failed to verify indexes for the cache of RDG'));
       }
 
       resolve(process);
@@ -90,41 +99,7 @@ module.exports = function () {
   function* onPacket({ ecs }) {
     if (ecs.length === 0) { return; }
 
-    const dois = ecs.map(([ec, done]) => ec.doi);
-
-    let tries = 0;
-    let doc;
-
-    while (!doc) {
-      if (++tries > maxAttempts) {
-        const err = new Error(`Failed to query rdg ${maxAttempts} times in a row`);
-        return Promise.reject(err);
-      }
-
-      try {
-        doc = yield query(dois);
-      } catch (e) {
-        logger.error(`rdg: ${e.message}`);
-      }
-
-      yield wait(throttle);
-    }
-
-
-    for (const [ec, done] of ecs) {
-      try {
-        // If we can't find a result for a given ID, we cache an empty document
-        yield cacheResult(ec.doi, doc || {});
-      } catch (e) {
-        report.inc('general', 'rdg-cache-fails');
-      }
-
-      if (doc) {
-        enrichEc(ec, doc);
-      }
-
-      done();
-    }
+    yield Promise.all(ecs.map(([ec, done]) => co.wrap(processEc)(ec, done)));
   }
 
   /**
@@ -135,6 +110,53 @@ module.exports = function () {
   function enrichEc(ec, result) {
     ec.publication_title = result.title;
     // ec.citation = result.citation;
+  }
+
+  /**
+   * Process and enrich one EC
+   * @param {Object} ec the EC to process
+   * @param {Function} done the callback
+   */
+  function* processEc (ec, done) {
+    let tries = 0;
+    let result;
+
+    while (typeof result !== 'object') {
+      if (tries >= maxTries) {
+        if (onFail === 'ignore') {
+          logger.error(`RDG: ignoring EC enrichment after ${maxTries} failed attempts`);
+          done();
+          return;
+        }
+
+        if (onFail === 'abort') {
+          const err = new Error(`Failed to query RDG ${maxTries} times in a row`);
+          return Promise.reject(err);
+        }
+      }
+
+      try {
+        result = yield query(ec.doi);
+      } catch (e) {
+        logger.error(`RDG: ${e.message}`);
+      }
+
+      yield wait(throttle * Math.pow(2, tries));
+      tries += 1;
+    }
+
+    try {
+      // If we can't find a result for a given DOI, we cache an empty document
+      yield cacheResult(ec.doi, result || {});
+    } catch (e) {
+      report.inc('general', 'rdg-cache-fails');
+    }
+
+    if (result) {
+      enrichEc(ec, result);
+    }
+
+    done();
   }
 
   /**
@@ -200,6 +222,9 @@ module.exports = function () {
       // The entire object can be pretty big
       // We only cache what we need to limit memory usage
       const cached = {};
+      if (cached.title !== null) {
+        cached.title = item.title;
+      }
 
       cache.set(id, cached, (err, result) => {
         if (err) { return reject(err); }
