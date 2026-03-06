@@ -93,10 +93,10 @@ module.exports = function () {
 
 
   /**
-     * Process a packet of ECs
-     * @param {Array<Object>} ecs
-     * @param {Map<String, Set<String>>} groups
-     */
+    * Process a packet of ECs
+    * @param {Array<Object>} ecs
+    * @param {Map<String, Set<String>>} groups
+    */
   function* onPacket({ ecs }) {
     if (ecs.length === 0) { return; }
 
