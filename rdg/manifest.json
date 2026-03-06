@@ -1,0 +1,10 @@
+{
+  "headers": [
+    { "name": "rdg-cache" },
+    { "name": "rdg-on-fail" },
+    { "name": "rdg-ttl" },
+    { "name": "rdg-throttle" },
+    { "name": "rdg-packet-size" },
+    { "name": "rdg-max-tries" }
+  ]
+}
