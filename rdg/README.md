@@ -7,6 +7,7 @@ Fetches [RDG API](https://entrepot.recherche.data.gouv.fr/) metadata
 | Name | Type | Description |
 | --- | --- | --- |
 | publication_title | String | Name of publication. |
+| citation | String | group of authors, title, city, publication_year. |
 
 ## Prerequisites
 

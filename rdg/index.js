@@ -17,6 +17,9 @@ module.exports = function () {
 
   logger.verbose(`RDG cache: ${cacheEnabled ? 'enabled' : 'disabled'}`);
 
+  this.job.outputFields.added.push('publication_title');
+  this.job.outputFields.added.push('citation');
+
   // Strategy to adopt when an enrichment reaches maxTries : abort, ignore, retry
   let onFail = (req.header('rdg-on-fail') || 'abort').toLowerCase();
   let onFailValues = ['abort', 'ignore', 'retry'];
@@ -92,10 +95,10 @@ module.exports = function () {
   });
 
   /**
-     * Process a packet of ECs
-     * @param {Array<Object>} ecs
-     * @param {Map<String, Set<String>>} groups
-     */
+    * Process a packet of ECs
+    * @param {Array<Object>} ecs
+    * @param {Map<String, Set<String>>} groups
+    */
   function* onPacket({ ecs }) {
     if (ecs.length === 0) { return; }
 
@@ -108,8 +111,13 @@ module.exports = function () {
    * @param {Object} result the document used to enrich the EC
    */
   function enrichEc(ec, result) {
-    ec.publication_title = result.title;
-    // ec.citation = result.citation;
+    if (result.title) {
+      ec.publication_title = result.title;
+    }
+
+    if (result.citation) {
+      ec.citation = result.citation;
+    }
   }
 
   /**
@@ -197,12 +205,18 @@ module.exports = function () {
           return reject(new Error(`${response.statusCode} ${response.statusMessage}`));
         }
 
-        const title = body.datasetVersion.metadataBlocks.citation.fields.filter((f) => f.typeName === 'title')[0].value;
-        // const citation = body.datasetVersion.metadataBlocks.citation.fields.filter((f) => f.typeName === 'publication')[0].value.filter((f) => f.typeName === 'publicationCitation').value;
+        const data = body?.datasetVersion?.metadataBlocks?.citation?.fields;
+
+
+
+        const title = data.find((f) => f.typeName === 'title')?.value;
+        const citation = data.find((f) => f.typeName === 'publication')?.value
+          .find((f) => f?.publicationCitation?.typeName === 'publicationCitation')?.
+          publicationCitation?.value;
 
         const result = {
           title,
-          // citation
+          citation
         };
 
         resolve(result);
@@ -222,9 +236,8 @@ module.exports = function () {
       // The entire object can be pretty big
       // We only cache what we need to limit memory usage
       const cached = {};
-      if (cached.title !== null) {
-        cached.title = item.title;
-      }
+      cached.title = item.title;
+      cached.citation = item.citation;
 
       cache.set(id, cached, (err, result) => {
         if (err) { return reject(err); }
