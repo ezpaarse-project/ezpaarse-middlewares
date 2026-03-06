@@ -10,5 +10,5 @@ You'll find all information about ezPAARSE's middlewares in the [online document
 # all tests
 npm run test
 # single test
-npx mocha <path of middleware>
+npx mocha <path of spec file>
 ```
