@@ -3,7 +3,7 @@
     "node": true
   },
   "parserOptions": {
-    "ecmaVersion": 2017
+    "ecmaVersion": 2021
   },
   "globals": {
     "ezpaarse": false,
