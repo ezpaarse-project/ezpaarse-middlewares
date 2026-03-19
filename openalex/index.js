@@ -155,7 +155,11 @@ module.exports = function () {
     const issnl = result && result.best_oa_location && result.best_oa_location.source
       && result.best_oa_location.source.issn_l || '';
 
+    const publisherName = result && result.primary_location && result.primary_location.source
+      && result.primary_location.source.host_organization_name || '';
+
     ec.publication_title = result.title || '';
+    ec.publisher_name = publisherName;
     ec.publication_date = result.publication_date || '';
     ec.language = result.language || '';
     ec.is_oa = typeof isOa === 'boolean' ? isOa : undefined;
