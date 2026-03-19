@@ -8,6 +8,7 @@ Fetches [openalex](https://docs.openalex.org/) metadata.
 | --- | --- | --- |
 | publication_title | String | Name of publication. |
 | publication_date | String | Publication date |
+| publisher_name | String | Publisher name |
 | language | String | language of ressource |
 | is_oa | Boolean | Is there an OA copy of this resource. |
 | oa_status | String | The OA status, or color, of this resource. |
