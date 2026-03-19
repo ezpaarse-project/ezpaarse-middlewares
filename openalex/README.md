@@ -19,7 +19,7 @@ Fetches [openalex](https://docs.openalex.org/) metadata.
 ## Prerequisites
 
 Your EC needs a DOI for enrichment.
-**Open access information is valid for EC generated on the same day**. Unpaywall data does not retain open access history.
+**Open access information is valid for EC generated on the same day**. OpenAlex data does not retain open access history.
 
 **You must use openalex after filter, parser, deduplicator middleware.**
 
