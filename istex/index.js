@@ -1,6 +1,5 @@
 'use strict';
 
-const istex = require('node-istex').defaults({ extraQueryString: { sid: 'ezpaarse' } });
 const co = require('co');
 const data = require('./istex-rtype.json'); // matching between ezPAARSE and Istex types
 const cache = ezpaarse.lib('cache')('istex');
@@ -127,7 +126,7 @@ module.exports = function () {
         const [ec, done] = buffer.shift() || [];
         if (!ec) { break; }
 
-        if (ec.platform !== 'istex' || !ec.unitid) {
+        if (ec.platform !== 'istex' || ec.platform === 'elsevier' || !ec.unitid) {
           done();
           continue;
         }
@@ -174,58 +173,49 @@ module.exports = function () {
           continue;
         }
 
-        const results = new Map();
         let tries = 0;
-        let list;
+        let istexResults;
 
-        while (!list) {
+        while (!istexResults) {
           if (++tries > maxAttempts) {
             const err = new Error(`Failed to query Istex ${maxAttempts} times in a row`);
             return Promise.reject(err);
           }
 
+          const ids = Array.from(packet.ids);
+
           try {
-            list = yield queryIstex(Array.from(packet.ids));
+            istexResults = yield queryIstex(ids);
           } catch (e) {
             self.logger.error('Istex: ', e.message);
           }
-
+          console.log(ids);
           yield wait();
         }
 
-        for (const item of list) {
-
-          if (item.id && !results.has(item.id)) {
-            results.set(item.id, item);
-
-            try {
-              yield cacheResult(item.id, item);
-            } catch (e) {
-              report.inc('general', 'istex-cache-fail');
-            }
-          }
-
-          if (item.arkIstex && !results.has(item.arkIstex)) {
-            results.set(item.arkIstex, item);
-
-            try {
-              yield cacheResult(item.arkIstex, item);
-            } catch (e) {
-              report.inc('general', 'istex-cache-fail');
-            }
-          }
-        }
-
         for (const [ec, done] of packet.ecs) {
+          const idType = getTypeOfId(ec.unitid);
 
-          if (results.has(ec.unitid)) {
-            enrichEc(ec, results.get(ec.unitid));
+          let enrichData;
+
+          if (idType === 'ark') {
+            enrichData = istexResults.filter(doc => { return doc.arkIstex === ec.unitid; });
+          } else if (idType === 'doi') {
+            enrichData = istexResults.filter(doc => { return doc.doi[0] === ec.unitid || ec.doi; });
+          } else if (idType === 'pii') {
+            enrichData = istexResults.filter(doc => { return doc.host?.pii?.[0] === ec.unitid; });
           } else {
-            try {
-              yield cacheResult(ec.unitid, {});
-            } catch (e) {
-              report.inc('general', 'istex-cache-fail');
-            }
+            enrichData = istexResults.filter(doc => { return doc.id === ec.unitid; });
+          }
+
+          try {
+            yield cacheResult(ec.unitid, enrichData);
+          } catch (e) {
+            report.inc('general', 'istex-cache-fail');
+          }
+
+          if (enrichData.length === 1) {
+            enrichEc(ec, enrichData[0]);
           }
 
           done();
@@ -238,46 +228,64 @@ module.exports = function () {
     return new Promise(resolve => { setTimeout(resolve, throttle); });
   }
 
+  function sortIds(ids) {
+    const arkIds = ids.filter(id => /^ark:/i.test(id));
+    const doiIds = ids.filter(id => /^10\./i.test(id));
+    const piiIds = ids.filter(id => /^[SB]/i.test(id));
+    const istexIds
+      = ids.filter(id => !arkIds.includes(id) && !doiIds.includes(id) && !piiIds.includes(id));
+
+    return { arkIds, doiIds, piiIds, istexIds };
+  }
+
+  function getTypeOfId (id) {
+    if (/^ark:/i.test(id)) { return 'ark'; }
+    if (/^10\./i.test(id)) { return 'doi'; }
+    if (/^[SB]/i.test(id)) { return 'pii'; }
+    return 'istex-id';
+  }
+
   function queryIstex(ids) {
-    report.inc('general', 'istex-queries');
+    const { arkIds, doiIds, piiIds, istexIds } = sortIds(ids);
 
-    const subQueries = [];
-    const istexIds = [];
-    const arks = [];
+    let istexRequest = 'https://api.istex.fr/document/?q=';
 
-    ids.forEach(id => {
-      /^ark:/i.test(id) ? arks.push(id) : istexIds.push(id);
-    });
+    if (arkIds.length > 0) {
+      istexRequest = `${istexRequest}ark:("${arkIds.join('","')}")`;
+    }
+
+    if (doiIds.length > 0) {
+      istexRequest = `${istexRequest}doi.raw:("${doiIds.join('","')}")`;
+    }
+
+    if (piiIds.length > 0) {
+      istexRequest = `${istexRequest}pii.raw:("${piiIds.join('","')}")`;
+    }
 
     if (istexIds.length > 0) {
-      subQueries.push(`id:(${istexIds.join(' OR ')})`);
+      istexRequest = `${istexRequest}id:("${istexIds.join('","')}")`;
     }
 
-    if (arks.length > 0) {
-      subQueries.push(`arkIstex:("${arks.join('" OR "')}")`);
-    }
 
-    const size = istexIds.length + arks.length;
     const output = fields.join(',');
-    const q = subQueries.join(' OR ');
-
-    const query = `?size=${size}&output=${output}&q=${q}`;
-
-    return new Promise((resolve, reject) => {
-      istex.find(query, (err, result) => {
-        if (err) {
-          report.inc('general', 'istex-fails');
-          return reject(err);
+    return fetch(`${istexRequest}&output=${output}&sid=ezpaarse&size=${ids.length}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
         }
-
-        if (!Array.isArray(result && result.hits)) {
+        return response.json();
+      })
+      .then(json => {
+        if (!Array.isArray(json && json.hits)) {
           report.inc('general', 'istex-fails');
-          return reject(new Error('invalid response'));
+          throw new Error('invalid response');
         }
-
-        return resolve(result.hits);
+        return json.hits;
+      })
+      .catch(err => {
+        report.inc('general', 'istex-fails');
+        throw err;
       });
-    });
   }
 
   function cacheResult(id, item) {
