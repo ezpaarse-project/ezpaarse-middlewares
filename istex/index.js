@@ -15,6 +15,7 @@ const fields = [
   'genre',
   'host',
   'doi',
+  'pii',
   'arkIstex',
   'accessCondition'
 ];
@@ -126,7 +127,14 @@ module.exports = function () {
         const [ec, done] = buffer.shift() || [];
         if (!ec) { break; }
 
-        if (ec.platform !== 'istex' || ec.platform === 'elsevier' || !ec.unitid) {
+        const platforms = ['istex', 'sd'];
+
+        if (!ec.unitid) {
+          done();
+          continue;
+        }
+
+        if (!platforms.includes(ec.platform)) {
           done();
           continue;
         }
@@ -189,7 +197,6 @@ module.exports = function () {
           } catch (e) {
             self.logger.error('Istex: ', e.message);
           }
-          console.log(ids);
           yield wait();
         }
 
@@ -203,7 +210,9 @@ module.exports = function () {
           } else if (idType === 'doi') {
             enrichData = istexResults.filter(doc => { return doc.doi[0] === ec.unitid || ec.doi; });
           } else if (idType === 'pii') {
-            enrichData = istexResults.filter(doc => { return doc.host?.pii?.[0] === ec.unitid; });
+            enrichData = istexResults.filter(doc => {
+              // PII in istex is like S1359-6454(07)00782-3
+              return doc?.pii?.[0].replace(/[()-]/g, '') === ec.unitid; });
           } else {
             enrichData = istexResults.filter(doc => { return doc.id === ec.unitid; });
           }
@@ -259,16 +268,18 @@ module.exports = function () {
     }
 
     if (piiIds.length > 0) {
-      istexRequest = `${istexRequest}pii.raw:("${piiIds.join('","')}")`;
+      istexRequest = `${istexRequest}pii:("${piiIds.join('","')}")`;
     }
 
     if (istexIds.length > 0) {
       istexRequest = `${istexRequest}id:("${istexIds.join('","')}")`;
     }
 
-
     const output = fields.join(',');
-    return fetch(`${istexRequest}&output=${output}&sid=ezpaarse&size=${ids.length}`)
+
+    istexRequest = `${istexRequest}&output=${output}&sid=ezpaarse&size=${ids.length}`;
+
+    return fetch(istexRequest)
       .then(response => {
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
