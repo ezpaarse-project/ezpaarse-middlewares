@@ -240,7 +240,7 @@ module.exports = function () {
   function sortIds(ids) {
     const arkIds = ids.filter(id => /^ark:/i.test(id));
     const doiIds = ids.filter(id => /^10\./i.test(id));
-    const piiIds = ids.filter(id => /^[SB]/i.test(id));
+    const piiIds = ids.filter(id => /^(?:[SB].*|\d{16})$/i.test(id));
     const istexIds
       = ids.filter(id => !arkIds.includes(id) && !doiIds.includes(id) && !piiIds.includes(id));
 
@@ -250,7 +250,7 @@ module.exports = function () {
   function getTypeOfId (id) {
     if (/^ark:/i.test(id)) { return 'ark'; }
     if (/^10\./i.test(id)) { return 'doi'; }
-    if (/^[SB]/i.test(id)) { return 'pii'; }
+    if (/^(?:[SB].*|\d{16})$/i.test(id)) { return 'pii'; }
     return 'istex-id';
   }
 
