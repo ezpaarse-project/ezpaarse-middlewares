@@ -195,7 +195,7 @@ module.exports = function () {
           try {
             istexResults = yield queryIstex(ids);
           } catch (e) {
-            self.logger.error('Istex: ', e.message);
+            self.logger.error('Istex:', e);
           }
           yield wait();
         }
@@ -217,15 +217,17 @@ module.exports = function () {
             enrichData = istexResults.filter(doc => { return doc.id === ec.unitid; });
           }
 
+          if (enrichData.length === 1) {
+            enrichData = enrichData[0];
+          }
+
           try {
             yield cacheResult(ec.unitid, enrichData);
           } catch (e) {
             report.inc('general', 'istex-cache-fail');
           }
 
-          if (enrichData.length === 1) {
-            enrichEc(ec, enrichData[0]);
-          }
+          enrichEc(ec, enrichData);
 
           done();
         }
@@ -255,6 +257,7 @@ module.exports = function () {
   }
 
   function queryIstex(ids) {
+    report.inc('general', 'istex-queries');
     const { arkIds, doiIds, piiIds, istexIds } = sortIds(ids);
 
     let istexRequest = 'https://api.istex.fr/document/?q=';
@@ -314,7 +317,9 @@ module.exports = function () {
           language: item.language,
           genre: item.genre,
           host: item.host,
-          doi: item.doi
+          doi: item.doi,
+          arkIstex: item.arkIstex,
+          accessCondition: item.accessCondition
         };
       }
 
