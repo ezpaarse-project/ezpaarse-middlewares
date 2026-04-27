@@ -230,7 +230,7 @@ module.exports = function () {
             report.inc('general', 'istex-cache-fail');
           }
 
-          enrichEc(ec, enrichData);
+          enrichEc(ec, enrichData || {});
 
           done();
         }
