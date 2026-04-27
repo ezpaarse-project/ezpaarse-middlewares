@@ -20,6 +20,9 @@ const fields = [
   'accessCondition'
 ];
 
+const doiRegex = /^10\./i;
+const arkRegex = /^ark:/i;
+const piiRegex = /^(?:[SB][a-z0-9]{16}|[a-z0-9]{17})$/i;
 
 /**
  * Enrich ECs with istex data
@@ -240,9 +243,9 @@ module.exports = function () {
   }
 
   function sortIds(ids) {
-    const arkIds = ids.filter(id => /^ark:/i.test(id));
-    const doiIds = ids.filter(id => /^10\./i.test(id));
-    const piiIds = ids.filter(id => /^(?:[SB].*|\d{16})$/i.test(id));
+    const arkIds = ids.filter(id => arkRegex.test(id));
+    const doiIds = ids.filter(id => doiRegex.test(id));
+    const piiIds = ids.filter(id => piiRegex.test(id));
     const istexIds
       = ids.filter(id => !arkIds.includes(id) && !doiIds.includes(id) && !piiIds.includes(id));
 
@@ -250,9 +253,9 @@ module.exports = function () {
   }
 
   function getTypeOfId (id) {
-    if (/^ark:/i.test(id)) { return 'ark'; }
-    if (/^10\./i.test(id)) { return 'doi'; }
-    if (/^(?:[SB].*|\d{16})$/i.test(id)) { return 'pii'; }
+    if (arkRegex.test(id)) { return 'ark'; }
+    if (doiRegex.test(id)) { return 'doi'; }
+    if (piiRegex.test(id)) { return 'pii'; }
     return 'istex-id';
   }
 
