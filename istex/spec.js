@@ -25,11 +25,22 @@ describe('istex', () => {
     );
 
     expect(ecs[0]).to.have.property('doi').equal('10.1038/ncb2001');
+    expect(ecs[0]).to.have.property('rtype').equal('MISC');
+
     expect(ecs[1]).to.have.property('doi').equal('10.1016/j.plantsci.2013.05.003');
+    expect(ecs[1]).to.have.property('rtype').equal('MISC');
+
     expect(ecs[2]).to.have.property('doi').equal('10.1038/368326a0');
+    expect(ecs[2]).to.have.property('rtype').equal('MISC');
+
     expect(ecs[3]).to.have.property('doi').equal('10.1007/BF00419453');
+    expect(ecs[3]).to.have.property('rtype').equal('MISC');
+
     expect(ecs[4]).to.have.property('doi').equal('10.1016/j.actamat.2007.11.012');
+    expect(ecs[4]).to.have.property('rtype').equal('MISC');
+
     expect(ecs[5]).to.have.property('doi').equal('10.1016/0198-0254(82)90221-7');
+    expect(ecs[5]).to.have.property('rtype').equal('MISC');
   });
 });
 

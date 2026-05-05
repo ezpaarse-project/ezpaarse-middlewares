@@ -22,7 +22,7 @@ const fields = [
 
 const doiRegex = /^10\./i;
 const arkRegex = /^ark:/i;
-const piiRegex = /^(?:[SB][a-z0-9]{16}|[a-z0-9]{17})$/i;
+const piiRegex = /^(?:[SB][a-z0-9]{16}|[a-z0-9]{16}|[a-z0-9]{17})$/i;
 
 /**
  * Enrich ECs with istex data
