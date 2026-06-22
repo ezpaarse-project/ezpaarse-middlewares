@@ -39,6 +39,12 @@ module.exports = function () {
   // TODO 2025-04-11: fetch file from Inist Gitlab
 
   return new Promise((resolve, reject) => {
+    if (!fs.existsSync(path.resolve(__dirname, filenameField))) {
+      logger.error('[ip-to-abesid]: File not found');
+      reject(new Error(`File not found: ${filenameField}`));
+      return;
+    }
+
     fs.readFile(path.resolve(__dirname, filenameField), 'utf-8', (err, data) => {
       if (err) {
         logger.error('[ip-to-abesid]: Cannot read file');
