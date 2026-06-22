@@ -22,8 +22,8 @@ const parseCSVToJSON = (filePath) => {
 
     parser.on('end', () => {
       const data = results.reduce((acc, item) => {
-        if (item.id_abes && item.IDP) {
-          acc[item.IDP] = item.id_abes;
+        if (item.ABESID && item.IDP) {
+          acc[item.IDP] = item.ABESID;
         }
         return acc;
       }, {});
@@ -47,7 +47,7 @@ module.exports = function () {
 
   let idsAbes = {};
 
-  const filePath = path.resolve(__dirname, 'abes_idp_2024-10.tsv');
+  const filePath = path.resolve(__dirname, 'abesid_idp.tsv');
 
   return new Promise((resolve, reject) => {
     parseCSVToJSON(filePath)
