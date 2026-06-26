@@ -326,6 +326,10 @@ module.exports = function () {
         };
       }
 
+      if (Array.isArray(id)) {
+        id = id[0];
+      }
+
       cache.set(id, cached, (err, result) => {
         if (err) { return reject(err); }
         resolve(result);
