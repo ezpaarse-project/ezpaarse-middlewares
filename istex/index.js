@@ -305,6 +305,10 @@ module.exports = function () {
       });
   }
 
+  /**
+   * @param {string} id unit id of EC
+   * @param {object} item result of API istex
+   */
   function cacheResult(id, item) {
     return new Promise((resolve, reject) => {
       if (!id || !item) { return resolve(); }
