@@ -1,6 +1,5 @@
 'use strict';
 
-const istex = require('node-istex').defaults({ extraQueryString: { sid: 'ezpaarse' } });
 const co = require('co');
 const data = require('./istex-rtype.json'); // matching between ezPAARSE and Istex types
 const cache = ezpaarse.lib('cache')('istex');
@@ -16,10 +15,14 @@ const fields = [
   'genre',
   'host',
   'doi',
+  'pii',
   'arkIstex',
   'accessCondition'
 ];
 
+const doiRegex = /^10\./i;
+const arkRegex = /^ark:/i;
+const piiRegex = /^(?:[SB][a-z0-9]{16}|[a-z0-9]{16}|[a-z0-9]{17})$/i;
 
 /**
  * Enrich ECs with istex data
@@ -127,7 +130,14 @@ module.exports = function () {
         const [ec, done] = buffer.shift() || [];
         if (!ec) { break; }
 
-        if (ec.platform !== 'istex' || !ec.unitid) {
+        const platforms = ['istex', 'sd'];
+
+        if (!ec.unitid) {
+          done();
+          continue;
+        }
+
+        if (!platforms.includes(ec.platform)) {
           done();
           continue;
         }
@@ -174,59 +184,59 @@ module.exports = function () {
           continue;
         }
 
-        const results = new Map();
         let tries = 0;
-        let list;
+        let istexResults;
 
-        while (!list) {
+        while (!istexResults) {
           if (++tries > maxAttempts) {
             const err = new Error(`Failed to query Istex ${maxAttempts} times in a row`);
             return Promise.reject(err);
           }
 
+          const ids = Array.from(packet.ids);
+
           try {
-            list = yield queryIstex(Array.from(packet.ids));
+            istexResults = yield queryIstex(ids);
           } catch (e) {
-            self.logger.error('Istex: ', e.message);
+            self.logger.error('Istex:', e);
           }
 
           yield wait();
         }
 
-        for (const item of list) {
-
-          if (item.id && !results.has(item.id)) {
-            results.set(item.id, item);
-
-            try {
-              yield cacheResult(item.id, item);
-            } catch (e) {
-              report.inc('general', 'istex-cache-fail');
-            }
+        // Indexer les résultats par ID pour une recherche plus rapide
+        const indexedResults = {};
+        istexResults.forEach(doc => {
+          if (doc.arkIstex) indexedResults[doc.arkIstex] = doc;
+          if (doc.doi?.[0]) indexedResults[doc.doi[0]] = doc;
+          if (doc?.pii?.[0]) {
+            const normalizedPii = doc.pii[0].replace(/[()-]/g, '');
+            indexedResults[normalizedPii] = doc;
           }
-
-          if (item.arkIstex && !results.has(item.arkIstex)) {
-            results.set(item.arkIstex, item);
-
-            try {
-              yield cacheResult(item.arkIstex, item);
-            } catch (e) {
-              report.inc('general', 'istex-cache-fail');
-            }
-          }
-        }
+          if (doc.id) indexedResults[doc.id] = doc;
+        });
 
         for (const [ec, done] of packet.ecs) {
+          const idType = getTypeOfId(ec.unitid);
+          let enrichData;
 
-          if (results.has(ec.unitid)) {
-            enrichEc(ec, results.get(ec.unitid));
+          if (idType === 'ark') {
+            enrichData = indexedResults[ec.unitid];
+          } else if (idType === 'doi') {
+            enrichData = indexedResults[ec.unitid] || indexedResults[ec.doi];
+          } else if (idType === 'pii') {
+            enrichData = indexedResults[ec.unitid];
           } else {
-            try {
-              yield cacheResult(ec.unitid, {});
-            } catch (e) {
-              report.inc('general', 'istex-cache-fail');
-            }
+            enrichData = indexedResults[ec.unitid];
           }
+
+          try {
+            yield cacheResult(ec.unitid, enrichData || {});
+          } catch (e) {
+            report.inc('general', 'istex-cache-fail');
+          }
+
+          enrichEc(ec, enrichData || {});
 
           done();
         }
@@ -238,48 +248,79 @@ module.exports = function () {
     return new Promise(resolve => { setTimeout(resolve, throttle); });
   }
 
-  function queryIstex(ids) {
-    report.inc('general', 'istex-queries');
+  function sortIds(ids) {
+    const arkIds = ids.filter(id => arkRegex.test(id));
+    const doiIds = ids.filter(id => doiRegex.test(id));
+    const piiIds = ids.filter(id => piiRegex.test(id));
+    const istexIds
+      = ids.filter(id => !arkIds.includes(id) && !doiIds.includes(id) && !piiIds.includes(id));
 
-    const subQueries = [];
-    const istexIds = [];
-    const arks = [];
-
-    ids.forEach(id => {
-      /^ark:/i.test(id) ? arks.push(id) : istexIds.push(id);
-    });
-
-    if (istexIds.length > 0) {
-      subQueries.push(`id:(${istexIds.join(' OR ')})`);
-    }
-
-    if (arks.length > 0) {
-      subQueries.push(`arkIstex:("${arks.join('" OR "')}")`);
-    }
-
-    const size = istexIds.length + arks.length;
-    const output = fields.join(',');
-    const q = subQueries.join(' OR ');
-
-    const query = `?size=${size}&output=${output}&q=${q}`;
-
-    return new Promise((resolve, reject) => {
-      istex.find(query, (err, result) => {
-        if (err) {
-          report.inc('general', 'istex-fails');
-          return reject(err);
-        }
-
-        if (!Array.isArray(result && result.hits)) {
-          report.inc('general', 'istex-fails');
-          return reject(new Error('invalid response'));
-        }
-
-        return resolve(result.hits);
-      });
-    });
+    return { arkIds, doiIds, piiIds, istexIds };
   }
 
+  function getTypeOfId (id) {
+    if (arkRegex.test(id)) { return 'ark'; }
+    if (doiRegex.test(id)) { return 'doi'; }
+    if (piiRegex.test(id)) { return 'pii'; }
+    return 'istex-id';
+  }
+
+  function queryIstex(ids) {
+    report.inc('general', 'istex-queries');
+    const { arkIds, doiIds, piiIds, istexIds } = sortIds(ids);
+
+    let queryParts = [];
+
+    if (arkIds.length > 0) {
+      queryParts.push(`ark:("${arkIds.join('","')}")`);
+    }
+
+    if (doiIds.length > 0) {
+      queryParts.push(`doi.raw:("${doiIds.join('","')}")`);
+    }
+
+    if (piiIds.length > 0) {
+      queryParts.push(`pii:("${piiIds.join('","')}")`);
+    }
+
+    if (istexIds.length > 0) {
+      queryParts.push(`id:("${istexIds.join('","')}")`);
+    }
+
+    const output = fields.join(',');
+    const baseUrl = 'https://api.istex.fr/document/';
+
+    const params = new URLSearchParams();
+    params.set('q', queryParts.join(' '));
+    params.set('output', output);
+    params.set('sid', 'ezpaarse');
+    params.set('size', ids.length);
+
+    const istexRequest = `${baseUrl}?${params.toString()}`;
+    return fetch(istexRequest)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(json => {
+        if (!Array.isArray(json && json.hits)) {
+          report.inc('general', 'istex-fails');
+          throw new Error('invalid response');
+        }
+        return json.hits;
+      })
+      .catch(err => {
+        report.inc('general', 'istex-fails');
+        throw err;
+      });
+  }
+
+  /**
+   * @param {string} id unit id of EC
+   * @param {object} item result of API istex
+   */
   function cacheResult(id, item) {
     return new Promise((resolve, reject) => {
       if (!id || !item) { return resolve(); }
@@ -295,8 +336,14 @@ module.exports = function () {
           language: item.language,
           genre: item.genre,
           host: item.host,
-          doi: item.doi
+          doi: item.doi,
+          arkIstex: item.arkIstex,
+          accessCondition: item.accessCondition
         };
+      }
+
+      if (Array.isArray(id)) {
+        id = id[0];
       }
 
       cache.set(id, cached, (err, result) => {
