@@ -200,32 +200,38 @@ module.exports = function () {
           } catch (e) {
             self.logger.error('Istex:', e);
           }
+
           yield wait();
         }
 
+        // Indexer les résultats par ID pour une recherche plus rapide
+        const indexedResults = {};
+        istexResults.forEach(doc => {
+          if (doc.arkIstex) indexedResults[doc.arkIstex] = doc;
+          if (doc.doi?.[0]) indexedResults[doc.doi[0]] = doc;
+          if (doc?.pii?.[0]) {
+            const normalizedPii = doc.pii[0].replace(/[()-]/g, '');
+            indexedResults[normalizedPii] = doc;
+          }
+          if (doc.id) indexedResults[doc.id] = doc;
+        });
+
         for (const [ec, done] of packet.ecs) {
           const idType = getTypeOfId(ec.unitid);
-
           let enrichData;
 
           if (idType === 'ark') {
-            enrichData = istexResults.filter(doc => { return doc.arkIstex === ec.unitid; });
+            enrichData = indexedResults[ec.unitid];
           } else if (idType === 'doi') {
-            enrichData = istexResults.filter(doc => { return doc.doi[0] === ec.unitid || ec.doi; });
+            enrichData = indexedResults[ec.unitid] || indexedResults[ec.doi];
           } else if (idType === 'pii') {
-            enrichData = istexResults.filter(doc => {
-              // PII in istex is like S1359-6454(07)00782-3
-              return doc?.pii?.[0].replace(/[()-]/g, '') === ec.unitid; });
+            enrichData = indexedResults[ec.unitid];
           } else {
-            enrichData = istexResults.filter(doc => { return doc.id === ec.unitid; });
-          }
-
-          if (enrichData.length === 1) {
-            enrichData = enrichData[0];
+            enrichData = indexedResults[ec.unitid];
           }
 
           try {
-            yield cacheResult(ec.unitid, enrichData);
+            yield cacheResult(ec.unitid, enrichData || {});
           } catch (e) {
             report.inc('general', 'istex-cache-fail');
           }
@@ -263,28 +269,34 @@ module.exports = function () {
     report.inc('general', 'istex-queries');
     const { arkIds, doiIds, piiIds, istexIds } = sortIds(ids);
 
-    let istexRequest = 'https://api.istex.fr/document/?q=';
+    let queryParts = [];
 
     if (arkIds.length > 0) {
-      istexRequest = `${istexRequest}ark:("${arkIds.join('","')}")`;
+      queryParts.push(`ark:("${arkIds.join('","')}")`);
     }
 
     if (doiIds.length > 0) {
-      istexRequest = `${istexRequest}doi.raw:("${doiIds.join('","')}")`;
+      queryParts.push(`doi.raw:("${doiIds.join('","')}")`);
     }
 
     if (piiIds.length > 0) {
-      istexRequest = `${istexRequest}pii:("${piiIds.join('","')}")`;
+      queryParts.push(`pii:("${piiIds.join('","')}")`);
     }
 
     if (istexIds.length > 0) {
-      istexRequest = `${istexRequest}id:("${istexIds.join('","')}")`;
+      queryParts.push(`id:("${istexIds.join('","')}")`);
     }
 
     const output = fields.join(',');
+    const baseUrl = 'https://api.istex.fr/document/';
 
-    istexRequest = `${istexRequest}&output=${output}&sid=ezpaarse&size=${ids.length}`;
+    const params = new URLSearchParams();
+    params.set('q', queryParts.join(' '));
+    params.set('output', output);
+    params.set('sid', 'ezpaarse');
+    params.set('size', ids.length);
 
+    const istexRequest = `${baseUrl}?${params.toString()}`;
     return fetch(istexRequest)
       .then(response => {
         if (!response.ok) {
