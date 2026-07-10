@@ -153,6 +153,7 @@ module.exports = function () {
         }
 
         packet.ecs.push([ec, done]);
+        // TODO : push ec.ark, ec.pii, ec.doi ...
         packet.ids.add(ec.unitid);
       }
 
@@ -217,15 +218,14 @@ module.exports = function () {
         });
 
         for (const [ec, done] of packet.ecs) {
-          const idType = getTypeOfId(ec.unitid);
           let enrichData;
 
-          if (idType === 'ark') {
-            enrichData = indexedResults[ec.unitid];
-          } else if (idType === 'doi') {
-            enrichData = indexedResults[ec.unitid] || indexedResults[ec.doi];
-          } else if (idType === 'pii') {
-            enrichData = indexedResults[ec.unitid];
+          if (ec.ark === 'ark') {
+            enrichData = indexedResults[ec.ark];
+          } else if (ec.doi === 'doi') {
+            enrichData = indexedResults[ec.doi];
+          } else if (ec.pii === 'pii') {
+            enrichData = indexedResults[ec.pii];
           } else {
             enrichData = indexedResults[ec.unitid];
           }
@@ -248,26 +248,24 @@ module.exports = function () {
     return new Promise(resolve => { setTimeout(resolve, throttle); });
   }
 
-  function sortIds(ids) {
-    const arkIds = ids.filter(id => arkRegex.test(id));
-    const doiIds = ids.filter(id => doiRegex.test(id));
-    const piiIds = ids.filter(id => piiRegex.test(id));
-    const istexIds
-      = ids.filter(id => !arkIds.includes(id) && !doiIds.includes(id) && !piiIds.includes(id));
-
-    return { arkIds, doiIds, piiIds, istexIds };
-  }
-
-  function getTypeOfId (id) {
-    if (arkRegex.test(id)) { return 'ark'; }
-    if (doiRegex.test(id)) { return 'doi'; }
-    if (piiRegex.test(id)) { return 'pii'; }
-    return 'istex-id';
+  function reduceIds(ids) {
+    return ids.reduce((acc, id) => {
+      if (arkRegex.test(id)) {
+        acc.arkIds.push(id);
+      } else if (doiRegex.test(id)) {
+        acc.doiIds.push(id);
+      } else if (piiRegex.test(id)) {
+        acc.piiIds.push(id);
+      } else {
+        acc.istexIds.push(id);
+      }
+      return acc;
+    }, { arkIds: [], doiIds: [], piiIds: [], istexIds: [] });
   }
 
   function queryIstex(ids) {
     report.inc('general', 'istex-queries');
-    const { arkIds, doiIds, piiIds, istexIds } = sortIds(ids);
+    const { arkIds, doiIds, piiIds, istexIds } = reduceIds(ids);
 
     let queryParts = [];
 

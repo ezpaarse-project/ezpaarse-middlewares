@@ -13,12 +13,12 @@ const cache = ezpaarse.lib('cache')('istex');
 // &output
 // =publicationDate,copyrightDate,corpusName,language,genre,host,doi,pii,arkIstex,accessCondition
 const ecs = [
-  { unitid: 'ark:/67375/GT4-FJLCPBW9-Q', platform: 'istex' },
-  { unitid: 'ark:/67375/6H6-XR9SK36N-F', platform: 'istex' },
+  { unitid: 'ark:/67375/GT4-FJLCPBW9-Q', platform: 'istex', ark: 'ark:/67375/GT4-FJLCPBW9-Q' },
+  { unitid: 'ark:/67375/6H6-XR9SK36N-F', platform: 'istex', ark: 'ark:/67375/6H6-XR9SK36N-F' },
   { unitid: '43B80EFC8F04F6D728C4C78B8A2447F1A9B515F1', platform: 'istex' },
   { unitid: '62C2495F8EA6AAF791AD1BE02565D01EE1F22A5D', platform: 'istex' },
-  { unitid: 'S1359645407007823', platform: 'sd' },
-  { unitid: '0198025482902217', platform: 'sd' },
+  { unitid: 'S1359645407007823', platform: 'sd', pii: 'S1359645407007823' },
+  { unitid: '0198025482902217', platform: 'sd', pii: '0198025482902217' },
 ];
 
 describe('istex', () => {
