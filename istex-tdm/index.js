@@ -26,65 +26,99 @@ module.exports = function () {
   const logger = this.logger;
 
   let sourceField = req.header('istex-tdm-source-field');
-  let abesidEnrichField = req.header('istex-tdm-abesid-enriched-field');
-  let filenameField = req.header('istex-tdm-filename');
 
   if (!sourceField) { sourceField = 'ip'; }
-  if (!abesidEnrichField) { abesidEnrichField = 'abes-id'; }
-  if (!filenameField) { filenameField = 'autorisation-abes.json'; }
 
   let simpleIPs = {};
   let rangeIPs = [];
 
   return new Promise((resolve, reject) => {
-    if (!fs.existsSync(path.resolve(__dirname, filenameField))) {
-      logger.error('[istex-tdm]: File not found');
-      reject(new Error(`File not found: ${filenameField}`));
+    const autorisationAbesFilename = 'autorisation-abes.json';
+    const inistIpFilename = 'inist-ip.json';
+
+    const autorisationAbesPath = path.resolve(__dirname, autorisationAbesFilename);
+    const inistIpPath = path.resolve(__dirname, inistIpFilename);
+
+    if (!fs.existsSync(autorisationAbesPath)) {
+      logger.error(`[istex-tdm]: ${autorisationAbesFilename} not found`);
+      reject(new Error(`${autorisationAbesFilename} not found`));
       return;
     }
 
-    fs.readFile(path.resolve(__dirname, filenameField), 'utf-8', (err, data) => {
-      if (err) {
-        logger.error('[istex-tdm]: Cannot read file');
-        reject(err);
-        return;
-      }
+    if (!fs.existsSync(inistIpPath)) {
+      logger.error(`[istex-tdm]: ${inistIpFilename} not found`);
+      reject(new Error(`${inistIpFilename} not found`));
+      return;
+    }
 
-      try {
-        const listIP = JSON.parse(data);
+    Promise.all([
+      fs.promises.readFile(autorisationAbesPath, 'utf-8'),
+      fs.promises.readFile(inistIpPath, 'utf-8'),
+    ])
+      .then(([autorisationAbesData, inistIpData]) => {
+        let autorisationAbesJson;
+        let inistIpJson;
 
-        if (!Array.isArray(listIP.ips)) {
-          logger.error('[istex-tdm]: No ips found in file');
-          reject(new Error('No ips found in file'));
+        try {
+          autorisationAbesJson = JSON.parse(autorisationAbesData);
+        } catch (error) {
+          logger.error(`[istex-tdm]: Cannot parse ${autorisationAbesFilename}`);
+          reject(error);
           return;
         }
 
-        simpleIPs = listIP.ips.reduce((acc, { ip, _id, _comment }) => {
+        try {
+          inistIpJson = JSON.parse(inistIpData);
+        } catch (error) {
+          logger.error(`[istex-tdm]: Cannot parse ${inistIpFilename}`);
+          reject(error);
+          return;
+        }
+
+        if (!Array.isArray(autorisationAbesJson.ips)) {
+          logger.error(`[istex-tdm]: No ips found in ${autorisationAbesFilename}`);
+          reject(new Error(`No ips found in ${autorisationAbesFilename}`));
+          return;
+        }
+
+        if (!Array.isArray(inistIpJson.ips)) {
+          logger.error(`[istex-tdm]: No ips found in ${inistIpFilename}`);
+          reject(new Error(`No ips found in ${inistIpFilename}`));
+          return;
+        }
+
+        const mergedIps = [...autorisationAbesJson.ips, ...inistIpJson.ips];
+
+        simpleIPs = mergedIps.reduce((acc, { ip, _id, _comment }) => {
           acc[ip] = { _id, _comment };
           return acc;
         }, {});
 
-        if (listIP.ipRanges) {
-          rangeIPs = listIP.ipRanges;
+        const mergedIpRanges = [
+          ...(autorisationAbesJson.ipRanges || []),
+          ...(inistIpJson.ipRanges || []),
+        ];
+
+        if (mergedIpRanges.length > 0) {
+          rangeIPs = mergedIpRanges;
         }
 
         resolve(process);
-      } catch (error) {
-        logger.error('[istex-tdm]: Cannot parse ips');
-        reject(error);
-      }
-    });
+      })
+      .catch((err) => {
+        logger.error('[istex-tdm]: Cannot read file');
+        reject(err);
+      });
   });
 
   function process(ec, next) {
-    if (!ec || !ec[sourceField] || ec[abesidEnrichField]) { return next(); }
+    if (!ec || !ec[sourceField]) { return next(); }
 
 
-    const abesId = simpleIPs[ec[sourceField]];
+    const simpleIP = simpleIPs[ec[sourceField]];
 
-    if (abesId) {
-      ec[abesidEnrichField] = abesId._id;
-      ec['institutionName']  = abesId._comment;
+    if (simpleIP) {
+      ec['institutionName'] = simpleIP._comment;
       return next();
     }
 
@@ -93,11 +127,10 @@ module.exports = function () {
       return next();
     }
 
-    const result = findMatchingRangeId(ec[sourceField], rangeIPs);
+    const resultIP = findMatchingRangeId(ec[sourceField], rangeIPs);
 
-    if (result) {
-      ec[abesidEnrichField] = result._id;
-      ec['institutionName']  = result._comment;
+    if (resultIP) {
+      ec['institutionName'] = resultIP._comment;
     }
     next();
   }
