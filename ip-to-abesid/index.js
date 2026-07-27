@@ -14,7 +14,7 @@ function findMatchingRangeId(ip, ipRanges) {
     const fromNum = ipToNumber(range.from);
     const toNum = ipToNumber(range.to);
     if (ipNum >= fromNum && ipNum <= toNum) {
-      return range._id;
+      return range;
     }
   }
 
@@ -27,10 +27,12 @@ module.exports = function () {
 
   let sourceField = req.header('ip-to-abesid-source-field');
   let enrichedField = req.header('ip-to-abesid-enriched-field');
+  let institutionNameEnrich = req.header('ip-to-abesid-institution-name-enrich');
   let filenameField = req.header('ip-to-abesid-filename');
 
   if (!sourceField) { sourceField = 'ip'; }
   if (!enrichedField) { enrichedField = 'abes-id'; }
+  if (!institutionNameEnrich) { institutionNameEnrich = false; }
   if (!filenameField) { filenameField = 'autorisation-abes.json'; }
 
   let simpleIPs = {};
@@ -61,8 +63,8 @@ module.exports = function () {
           return;
         }
 
-        simpleIPs = listIP.ips.reduce((acc, { ip, _id }) => {
-          acc[ip] = _id;
+        simpleIPs = listIP.ips.reduce((acc, { ip, _id, _comment }) => {
+          acc[ip] = { _id, _comment };
           return acc;
         }, {});
 
@@ -85,7 +87,10 @@ module.exports = function () {
     const abesId = simpleIPs[ec[sourceField]];
 
     if (abesId) {
-      ec[enrichedField] = abesId;
+      ec[enrichedField] = abesId._id;
+      if (institutionNameEnrich) {
+        ec['institutionName']  = abesId._comment;
+      }
       return next();
     }
 
@@ -94,13 +99,14 @@ module.exports = function () {
       return next();
     }
 
-
     const result = findMatchingRangeId(ec[sourceField], rangeIPs);
 
     if (result) {
-      ec[enrichedField] = result;
+      ec[enrichedField] = result._id;
+      if (institutionNameEnrich) {
+        ec['institutionName']  = result._comment;
+      }
     }
-
     next();
   }
 };

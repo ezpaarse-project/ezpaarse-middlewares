@@ -20,6 +20,7 @@ You need to find the file autorisation-abes.json on Inist Gitlab on Istex repo a
 
 + **ip-to-abesid-source-field** : Fields in the ec for enrichment. "ip" by default.
 + **ip-to-abesid-enriched-field** : Enriched fields in the EC. "abes-id" by default
+**ip-to-abesid-institution-name-enrich** : Enrich with name of institution. Desactivated by default
 
 ### Example
 
