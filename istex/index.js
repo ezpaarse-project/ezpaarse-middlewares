@@ -396,17 +396,20 @@ module.exports = function () {
     if (genre) { ec['istex_genre'] = getValue(genre); }
     if (language) { ec['language'] = getValue(language); }
 
-    switch (ec['istex_rtype']) {
-    case 'fulltext':
-      ec['rtype'] = data[genre] || 'MISC';
-      break;
-    case 'metadata':
-    case 'enrichments':
-    case 'record':
-      ec['rtype'] = 'METADATA';
-      break;
-    default:
-      ec['rtype'] = 'MISC';
+    // don't override existing rtype for elsevier
+    if (ec.platform === 'istex') {
+      switch (ec['istex_rtype']) {
+      case 'fulltext':
+        ec['rtype'] = data[genre] || 'MISC';
+        break;
+      case 'metadata':
+      case 'enrichments':
+      case 'record':
+        ec['rtype'] = 'METADATA';
+        break;
+      default:
+        ec['rtype'] = 'MISC';
+      }
     }
   }
 };

@@ -55,10 +55,10 @@ describe('istex', () => {
     expect(ecsForTest1[3]).to.have.property('rtype').equal('MISC');
 
     expect(ecsForTest1[4]).to.have.property('doi').equal('10.1016/j.actamat.2007.11.012');
-    expect(ecsForTest1[4]).to.have.property('rtype').equal('MISC');
+    expect(ecsForTest1[4]).to.not.have.property('rtype');
 
     expect(ecsForTest1[5]).to.have.property('doi').equal('10.1016/0198-0254(82)90221-7');
-    expect(ecsForTest1[5]).to.have.property('rtype').equal('MISC');
+    expect(ecsForTest1[5]).to.not.have.property('rtype');
 
     const cachedDoc = await new Promise((resolve, reject) => {
       cache.get('ark:/67375/GT4-FJLCPBW9-Q', (error, res) => {
@@ -97,9 +97,9 @@ describe('istex', () => {
     expect(ecsForTest2[3]).to.have.property('rtype').equal('MISC');
 
     expect(ecsForTest2[4]).to.have.property('doi').equal('10.1016/j.actamat.2007.11.012');
-    expect(ecsForTest2[4]).to.have.property('rtype').equal('MISC');
+    expect(ecsForTest1[4]).to.not.have.property('rtype');
 
     expect(ecsForTest2[5]).to.have.property('doi').equal('10.1016/0198-0254(82)90221-7');
-    expect(ecsForTest2[5]).to.have.property('rtype').equal('MISC');
+    expect(ecsForTest1[5]).to.not.have.property('rtype');
   });
 });
