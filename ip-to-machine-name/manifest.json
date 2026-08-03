@@ -1,0 +1,6 @@
+{
+  "headers": [
+    { "name": "ip-to-machine-name-source-field" },
+    { "name": "ip-to-machine-name-source-field-enriched-field" }
+  ]
+}
