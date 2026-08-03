@@ -16,12 +16,17 @@ idp-to-abesid enrichment middleware needs idp in ec.
 
 **You must use idp-to-abesid after filter, parser, deduplicator middleware.**
 
+## Example of structure of file
+
+```
+ABESID	IDP
+ABES0123456789	https://ciboulette.institution.fr/idp/shibboleth
+```
+
 ## Headers
 
 + **idp-to-abesid-source-field** : Fields in the ec for enrichment. "login" by default.
 + **idp-to-abesid-enriched-field** : Enriched fields in the CE. "abes-id" by default
-
-### Example
 
 ## How to use
 

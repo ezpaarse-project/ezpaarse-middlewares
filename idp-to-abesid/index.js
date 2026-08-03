@@ -37,13 +37,14 @@ const parseCSVToJSON = (filePath) => {
 };
 
 module.exports = function () {
-  const job = this.job;
-  const report = this.report;
   const req = this.request;
   const logger = this.logger;
 
-  let sourceField = req.header('idp-to-abesid-source-field') || 'login';
-  let enrichedField = req.header('idp-to-abesid-enriched-field') || 'abes-id';
+  let sourceField = req.header('idp-to-abesid-source-field');
+  let enrichedField = req.header('idp-to-abesid-enriched-field');
+
+  if (!sourceField) { sourceField = 'login'; }
+  if (!enrichedField) { enrichedField = 'abes-id'; }
 
   let idsAbes = {};
 
