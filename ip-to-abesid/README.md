@@ -16,13 +16,31 @@ You need to find the file autorisation-abes.json on Inist Gitlab on Istex repo a
 
 **You must use ip-to-abesid after filter, parser, deduplicator middleware.**
 
+## Example of structure of file
+
+```
+{
+  "ips": [
+    {
+			"ip": "127.0.0.1",
+			"_comment": "Insititution 1"
+		},
+  ],
+  "ipRanges": [
+    {
+			"from": "128.0.0.100",
+			"to": "128.0.1.110",
+			"_comment": "Institution 2"
+		},
+  ]
+}
+```
+
 ## Headers
 
 + **ip-to-abesid-source-field** : Fields in the ec for enrichment. "ip" by default.
 + **ip-to-abesid-enriched-field** : Enriched fields in the EC. "abes-id" by default
-**ip-to-abesid-institution-name-enrich** : Enrich with name of institution. Desactivated by default
-
-### Example
++ **ip-to-abesid-institution-name-enrich** : Enrich with name of institution. Desactivated by default
 
 ## How to use
 
