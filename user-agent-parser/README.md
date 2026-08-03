@@ -8,8 +8,6 @@ Parse the user-agent string and add a `ua` field containing the navigator name.
 | --- | --- | --- |
 | ua | String | Simplified name of user agent. |
 
-### Example
-
 ## How to use
 
 ### ezPAARSE admin interface
