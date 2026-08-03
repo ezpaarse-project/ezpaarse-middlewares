@@ -28,7 +28,7 @@ const parseCSVToJSON = (filePath) => {
     });
 
     parser.on('error', (err) => {
-      console.error('[abesid-to-etab]: Cannot read CSV File', err);
+      console.error('[abesid-to-institution-name]: Cannot read CSV File', err);
       return reject(err);
     });
   });
@@ -38,10 +38,13 @@ module.exports = function () {
   const req = this.request;
   const logger = this.logger;
 
-  const sourceField = req.header('abesid-to-etab-source-field') || 'abes-id';
+  let sourceField = req.header('abesid-to-institution-name-source-field');
+  let enrichedField = req.header('abesid-to-institution-name-enriched-field');
+  let filenameField = req.header('abesid-to-institution-name-filename');
 
-  const enrichedField = req.header('abesid-to-etab-enriched-field') || 'institutionName';
-  const filenameField = req.header('abesid-to-etab-filename') || 'Etablissements.csv';
+  if (!sourceField) { sourceField = 'abes-id'; }
+  if (!enrichedField) { enrichedField = 'institutionName'; }
+  if (!filenameField) { filenameField = 'Etablissements.csv'; }
 
   let institutions = {};
 
@@ -51,11 +54,11 @@ module.exports = function () {
     parseCSVToJSON(filePath)
       .then((jsonData) => {
         institutions = jsonData;
-        logger.info('[abesid-to-etab]: Successfully read CSV File');
+        logger.info('[abesid-to-institution-name]: Successfully read CSV File');
         return resolve(process);
       })
       .catch((err) => {
-        logger.error('[abesid-to-etab]: Cannot read CSV File', err);
+        logger.error('[abesid-to-institution-name]: Cannot read CSV File', err);
         this.job._stop(err);
         return reject(err);
       });
