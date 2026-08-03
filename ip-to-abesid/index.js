@@ -38,16 +38,16 @@ module.exports = function () {
   let simpleIPs = {};
   let rangeIPs = [];
 
-  // TODO 2025-04-11: fetch file from Inist Gitlab
+  const filePath = path.resolve(__dirname, filenameField);
 
   return new Promise((resolve, reject) => {
-    if (!fs.existsSync(path.resolve(__dirname, filenameField))) {
+    if (!fs.existsSync(filePath)) {
       logger.error('[ip-to-abesid]: File not found');
       reject(new Error(`File not found: ${filenameField}`));
       return;
     }
 
-    fs.readFile(path.resolve(__dirname, filenameField), 'utf-8', (err, data) => {
+    fs.readFile(filePath, 'utf-8', (err, data) => {
       if (err) {
         logger.error('[ip-to-abesid]: Cannot read file');
         reject(err);
