@@ -1,4 +1,4 @@
-# ip-to-machine-name
+# ip-to-entity
 
 Add machineName with ip.
 
@@ -10,10 +10,10 @@ Add machineName with ip.
 
 ## Prerequisites
 
-ip-to-machine-name enrichment middleware needs ip.
+ip-to-entity enrichment middleware needs ip.
 You need to find the file inist-ip.json.
 
-**You must use ip-to-machine-name after filter, parser, deduplicator middleware.**
+**You must use ip-to-entity after filter, parser, deduplicator middleware.**
 
 ## Example of structure of file
 
@@ -37,50 +37,50 @@ You need to find the file inist-ip.json.
 
 ## Headers
 
-+ **ip-to-machine-name-source-field** : Fields in the ec for enrichment. "ip" by default.
-+ **ip-to-machine-name-enriched-field** : Enriched field in the EC. "institution-name" by default.
++ **ip-to-entity-source-field** : Fields in the ec for enrichment. "ip" by default.
++ **ip-to-entity-enriched-field** : Enriched field in the EC. "institution-name" by default.
 
 ## How to use
 
 ### ezPAARSE admin interface
 
-You can add ip-to-machine-name by default to all your enrichments, To do this, go to the middleware section of administration.
+You can add ip-to-entity by default to all your enrichments, To do this, go to the middleware section of administration.
 
 ![image](./docs/admin-interface.png)
 
 ### ezPAARSE process interface
 
-You can use ip-to-machine-name for an enrichment process. You just add the middleware.
+You can use ip-to-entity for an enrichment process. You just add the middleware.
 
 ![image](./docs/process-interface.png)
 
 ### ezp
 
-You can use ip-to-machine-name for an enrichment process with [ezp](https://github.com/ezpaarse-project/node-ezpaarse) like this:
+You can use ip-to-entity for an enrichment process with [ezp](https://github.com/ezpaarse-project/node-ezpaarse) like this:
 
 ```bash
 # enrich with one file
 ezp process <path of your file> \
   --host <host of your ezPAARSE instance> \
   --settings <settings-id> \
-  --header "ezPAARSE-Middlewares: ip-to-machine-name" \
+  --header "ezPAARSE-Middlewares: ip-to-entity" \
   --out ./result.csv
 
 # enrich with multiples files
 ezp bulk <path of your directory> \
   --host <host of your ezPAARSE instance> \
   --settings <settings-id> \
-  --header "ezPAARSE-Middlewares: ip-to-machine-name" 
+  --header "ezPAARSE-Middlewares: ip-to-entity" 
 
 ```
 
 ### curl
 
-You can use ip-to-machine-name for an enrichment process with curl like this:
+You can use ip-to-entity for an enrichment process with curl like this:
 
 ```bash
 curl -X POST -v http://localhost:59599 \
-  -H "ezPAARSE-Middlewares: ip-to-machine-name" \
+  -H "ezPAARSE-Middlewares: ip-to-entity" \
   -H "Log-Format-Ezproxy: <line format>" \
   -F "file=@<log file path>"
 

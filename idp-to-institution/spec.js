@@ -8,10 +8,10 @@ const ecs = [
   { 'login': 'https://institution.renater.fr/idp/shibboleth' },
 ];
 
-describe('idp-to-institution-name', () => {
+describe('idp-to-institution', () => {
   it('Should enrich idp with "institution-name" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
-      ctx.request.headers['idp-to-institution-name-filename'] = 'test.json';
+      ctx.request.headers['idp-to-institution-filename'] = 'test.json';
     });
     const ec = ecs[0];
     process(ec, () => {});

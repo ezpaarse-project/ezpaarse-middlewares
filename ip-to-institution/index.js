@@ -25,10 +25,10 @@ module.exports = function () {
   const req = this.request;
   const logger = this.logger;
 
-  let sourceField = req.header('ip-to-abesid-source-field');
-  let enrichedField = req.header('ip-to-abesid-enriched-field');
-  let institutionNameEnrich = req.header('ip-to-abesid-institution-name-enrich');
-  let filenameField = req.header('ip-to-abesid-filename');
+  let sourceField = req.header('ip-to-institution-source-field');
+  let enrichedField = req.header('ip-to-institution-enriched-field');
+  let institutionNameEnrich = req.header('ip-to-institution-institution-name-enrich');
+  let filenameField = req.header('ip-to-institution-filename');
 
   if (!sourceField) { sourceField = 'ip'; }
   if (!enrichedField) { enrichedField = 'abes-id'; }
@@ -42,14 +42,14 @@ module.exports = function () {
 
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(filePath)) {
-      logger.error('[ip-to-abesid]: File not found');
+      logger.error('[ip-to-institution]: File not found');
       reject(new Error(`File not found: ${filenameField}`));
       return;
     }
 
     fs.readFile(filePath, 'utf-8', (err, data) => {
       if (err) {
-        logger.error('[ip-to-abesid]: Cannot read file');
+        logger.error('[ip-to-institution]: Cannot read file');
         reject(err);
         return;
       }
@@ -58,7 +58,7 @@ module.exports = function () {
         const listIP = JSON.parse(data);
 
         if (!Array.isArray(listIP.ips)) {
-          logger.error('[ip-to-abesid]: No ips found in file');
+          logger.error('[ip-to-institution]: No ips found in file');
           reject(new Error('No ips found in file'));
           return;
         }
@@ -74,7 +74,7 @@ module.exports = function () {
 
         resolve(process);
       } catch (error) {
-        logger.error('[ip-to-abesid]: Cannot parse ips');
+        logger.error('[ip-to-institution]: Cannot parse ips');
         reject(error);
       }
     });

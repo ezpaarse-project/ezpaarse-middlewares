@@ -10,10 +10,10 @@ const ecs = [
   { 'ip': '100.0.2.1' },
 ];
 
-describe('ip-to-machine-name', () => {
+describe('ip-to-entity', () => {
   it('Should enrich idp with "machineName" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
-      ctx.request.headers['ip-to-machine-name-filename'] = 'test.json';
+      ctx.request.headers['ip-to-entity-filename'] = 'test.json';
     });
     const ec = ecs[0];
     process(ec, () => {});
@@ -22,7 +22,7 @@ describe('ip-to-machine-name', () => {
 
   it('Should enrich idp with "machineName" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
-      ctx.request.headers['ip-to-machine-name-filename'] = 'test.json';
+      ctx.request.headers['ip-to-entity-filename'] = 'test.json';
     });
     const ec = ecs[1];
     process(ec, () => {});
@@ -31,7 +31,7 @@ describe('ip-to-machine-name', () => {
 
   it('Should enrich idp with "machineName" as source field', async () => {
     const process = await contextify(mw, (ctx) => {
-      ctx.request.headers['ip-to-machine-name-filename'] = 'test.json';
+      ctx.request.headers['ip-to-entity-filename'] = 'test.json';
     });
     const ec = ecs[2];
     process(ec, () => {});

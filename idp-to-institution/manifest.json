@@ -1,0 +1,7 @@
+{
+  "headers": [
+    { "name": "idp-to-institution-source-field" },
+    { "name": "idp-to-institution-enriched-field" },
+    { "name": "idp-to-institution-filename" }
+  ]
+}

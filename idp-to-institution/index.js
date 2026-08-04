@@ -7,9 +7,9 @@ module.exports = function () {
   const req = this.request;
   const logger = this.logger;
 
-  let sourceField = req.header('idp-to-institution-name-source-field');
-  let enrichedField = req.header('idp-to-institution-name-enriched-field');
-  let filenameField = req.header('idp-to-institution-name-filename');
+  let sourceField = req.header('idp-to-institution-source-field');
+  let enrichedField = req.header('idp-to-institution-enriched-field');
+  let filenameField = req.header('idp-to-institution-filename');
 
   if (!sourceField) { sourceField = 'login'; }
   if (!enrichedField) { enrichedField = 'institutionName'; }
@@ -21,14 +21,14 @@ module.exports = function () {
 
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(filePath)) {
-      logger.error('[idp-to-institution-name]: File not found');
+      logger.error('[idp-to-institution]: File not found');
       reject(new Error(`File not found: ${filenameField}`));
       return;
     }
 
     fs.readFile(filePath, 'utf-8', (err, data) => {
       if (err) {
-        logger.error('[idp-to-institution-name]: Cannot read file');
+        logger.error('[idp-to-institution]: Cannot read file');
         reject(err);
         return;
       }
@@ -43,7 +43,7 @@ module.exports = function () {
 
         resolve(process);
       } catch (error) {
-        logger.error('[idp-to-institution-name]: Cannot parse ips');
+        logger.error('[idp-to-institution]: Cannot parse ips');
         reject(error);
       }
     });

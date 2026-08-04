@@ -25,9 +25,9 @@ module.exports = function () {
   const req = this.request;
   const logger = this.logger;
 
-  let sourceField = req.header('ip-to-machine-name-source-field');
-  let enrichedField = req.header('ip-to-machine-name-source-field-enriched-field');
-  let filenameField = req.header('ip-to-machine-name-filename');
+  let sourceField = req.header('ip-to-entity-source-field');
+  let enrichedField = req.header('ip-to-entity-source-field-enriched-field');
+  let filenameField = req.header('ip-to-entity-filename');
 
   if (!sourceField) { sourceField = 'ip'; }
   if (!enrichedField) { enrichedField = 'machineName'; }
@@ -40,7 +40,7 @@ module.exports = function () {
     const inistIpPath = path.resolve(__dirname, filenameField);
 
     if (!fs.existsSync(inistIpPath)) {
-      logger.error(`[ip-to-machine-name]: ${filenameField} not found`);
+      logger.error(`[ip-to-entity]: ${filenameField} not found`);
       reject(new Error(`${filenameField} not found`));
       return;
     }
@@ -51,13 +51,13 @@ module.exports = function () {
       try {
         inistIpJson = JSON.parse(inistIpData);
       } catch (error) {
-        logger.error(`[ip-to-machine-name]: Cannot parse ${filenameField}`);
+        logger.error(`[ip-to-entity]: Cannot parse ${filenameField}`);
         reject(error);
         return;
       }
 
       if (!Array.isArray(inistIpJson.ips)) {
-        logger.error(`[ip-to-machine-name]: No ips found in ${filenameField}`);
+        logger.error(`[ip-to-entity]: No ips found in ${filenameField}`);
         reject(new Error(`No ips found in ${filenameField}`));
         return;
       }
@@ -74,7 +74,7 @@ module.exports = function () {
       resolve(process);
     })
       .catch((err) => {
-        logger.error('[ip-to-machine-name]: Cannot read file');
+        logger.error('[ip-to-entity]: Cannot read file');
         reject(err);
       });
   });

@@ -1,4 +1,4 @@
-# ip-to-abesid
+# ip-to-institution
 
 Add ABES-ID based on IP.
 
@@ -10,11 +10,11 @@ Add ABES-ID based on IP.
 
 ## Prerequisites
 
-ip-to-abesid enrichment middleware needs ip in ec.
+ip-to-institution enrichment middleware needs ip in ec.
 
 You need to find the file autorisation-abes.json on Inist Gitlab on Istex repo and put at the folder of this middleware.
 
-**You must use ip-to-abesid after filter, parser, deduplicator middleware.**
+**You must use ip-to-institution after filter, parser, deduplicator middleware.**
 
 ## Example of structure of file
 
@@ -38,27 +38,27 @@ You need to find the file autorisation-abes.json on Inist Gitlab on Istex repo a
 
 ## Headers
 
-+ **ip-to-abesid-source-field** : Fields in the ec for enrichment. "ip" by default.
-+ **ip-to-abesid-enriched-field** : Enriched fields in the EC. "abes-id" by default
-+ **ip-to-abesid-institution-name-enrich** : Enrich with name of institution. Desactivated by default
++ **ip-to-institution-source-field** : Fields in the ec for enrichment. "ip" by default.
++ **ip-to-institution-enriched-field** : Enriched fields in the EC. "abes-id" by default
++ **ip-to-institution-institution-name-enrich** : Enrich with name of institution. Desactivated by default
 
 ## How to use
 
 ### ezPAARSE admin interface
 
-You can add ip-to-abesid by default to all your enrichments, To do this, go to the middleware section of administration.
+You can add ip-to-institution by default to all your enrichments, To do this, go to the middleware section of administration.
 
 ![image](./docs/admin-interface.png)
 
 ### ezPAARSE process interface
 
-You can use ip-to-abesid for an enrichment process. You just add the middleware.
+You can use ip-to-institution for an enrichment process. You just add the middleware.
 
 ![image](./docs/process-interface.png)
 
 ### ezp
 
-You can use ip-to-abesid for an enrichment process with [ezp](https://github.com/ezpaarse-project/node-ezpaarse) like this:
+You can use ip-to-institution for an enrichment process with [ezp](https://github.com/ezpaarse-project/node-ezpaarse) like this:
 
 ```bash
 # enrich with one file
@@ -78,7 +78,7 @@ ezp bulk <path of your directory> \
 
 ### curl
 
-You can use ip-to-abesid for an enrichment process with curl like this:
+You can use ip-to-institution for an enrichment process with curl like this:
 
 ```bash
 curl -X POST -v http://localhost:59599 \
