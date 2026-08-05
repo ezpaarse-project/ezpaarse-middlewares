@@ -25,21 +25,15 @@ Your EC needs a DOI for enrichment.
 + **datacite-buffer-size** : Maximum number of memorized access events before sending a request. Defaults to ``1000``.
 + **datacite-max-attempts** : Maximum number of trials before passing the EC in error. Defaults to ``5``.
 
-
 ## How to use
 
-### ezPAARSE admin interface
+### ezPAARSE admin page
 
-You can add or remove datacite by default to all your enrichments, To do this, go to the middleware section of administration.
+On the `/admin/middlewares` page, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
-![image](./docs/admin-interface.png)
+### ezPAARSE process page
 
-### ezPAARSE process interface
-
-You can use datacite for an enrichment process. You just add the middleware.
-
-![image](./docs/process-interface.png)
-
+On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ menu, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezp
 

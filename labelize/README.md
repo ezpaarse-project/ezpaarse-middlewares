@@ -40,17 +40,13 @@ You can add or remove your labelize on ezpaarse config. It will be used on every
 }
 ```
 
-### ezPAARSE admin interface
+### ezPAARSE admin page
 
-You can add or remove labelize by default to all your enrichments, provided you have added parameters in the config. To do this, go to the middleware section of administration.
+On the `/admin/middlewares` page, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
-![image](./docs/admin-interface.png)
+### ezPAARSE process page
 
-### ezPAARSE process interface
-
-You can use labelize for an enrichment process.
-
-![image](./docs/process-interface.png)
+On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ menu, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezp
 

@@ -29,13 +29,13 @@ ID_ETAB_001;123456789;Etablissement A;Type A;1 Rue Exemple, 75000 Exempleville;E
 
 ## How to use
 
-### ezPAARSE admin interface
+### ezPAARSE admin page
 
 You can add abesid-to-institution by default to all your enrichments, To do this, go to the middleware section of administration.
 
 ![image](./docs/admin-interface.png)
 
-### ezPAARSE process interface
+### ezPAARSE process page
 
 You can use abesid-to-institution for an enrichment process. You just add the middleware.
 
