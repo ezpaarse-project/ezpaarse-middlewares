@@ -1,6 +1,7 @@
 [
   {
-    "IdP": "https://institution.renater.fr/idp/shibboleth",
-    "institutionName": "Institution of test"
+    "idp": "https://institution.renater.fr/idp/shibboleth",
+    "nomCouperin": "Institution of test",
+    "idCouperin": "bsm"
   }
 ]

@@ -15,6 +15,7 @@ describe('idp-to-institution', () => {
     });
     const ec = ecs[0];
     process(ec, () => {});
-    expect(ec).to.have.property('institution-name', 'Institution of test');
+    expect(ec).to.have.property('institutionName', 'Institution of test');
+    expect(ec).to.have.property('idCouperin', 'bsm');
   });
 });

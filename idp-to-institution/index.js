@@ -8,16 +8,16 @@ module.exports = function () {
   const logger = this.logger;
 
   let sourceField = req.header('idp-to-institution-source-field');
-  let enrichedField = req.header('idp-to-institution-enriched-field');
   let filenameField = req.header('idp-to-institution-filename');
+  let institutionNameEnrichedField = req.header('idp-to-institution-institution-name-enriched-field');
+  let idCouperinEnrichedField = req.header('idp-to-institution-id-couperin-enriched-field');
 
   if (!sourceField) { sourceField = 'login'; }
-  if (!enrichedField) { enrichedField = 'institutionName'; }
-  if (!filenameField) { filenameField = 'ListIdpdc.json'; }
+  if (!filenameField) { filenameField = 'ListeIdpIdc.json'; }
+  if (!institutionNameEnrichedField) { institutionNameEnrichedField = 'institutionName'; }
+  if (!idCouperinEnrichedField) { idCouperinEnrichedField = 'idCouperin'; }
 
   let idp;
-
-
 
   return new Promise((resolve, reject) => {
     if (!/^[a-zA-Z0-9_.-]+$/.test(filenameField)) {
@@ -43,10 +43,7 @@ module.exports = function () {
       try {
         const parsedData = JSON.parse(data);
 
-        idp = parsedData.reduce((acc, item) => {
-          acc[item.IdP] = item.institutionName;
-          return acc;
-        }, {});
+        idp = parsedData.reduce((acc, objet) => acc.set(objet.idp, objet), new Map());
 
         resolve(process);
       } catch (error) {
@@ -59,8 +56,10 @@ module.exports = function () {
   function process(ec, next) {
     if (!ec || !ec[sourceField]) { return next(); }
 
-    if (idp[ec[sourceField]]) {
-      ec[enrichedField] = idp[ec[sourceField]];
+    const entry = idp.get(ec[sourceField]);
+    if (entry) {
+      ec[institutionNameEnrichedField] = entry.nomCouperin;
+      ec[idCouperinEnrichedField] = entry.idCouperin;
     }
 
     next();
