@@ -38,9 +38,13 @@ module.exports = function () {
   let simpleIPs = {};
   let rangeIPs = [];
 
-  const filePath = path.resolve(__dirname, filenameField);
-
   return new Promise((resolve, reject) => {
+    if (!/^[a-z0-9_.-]+$/.test(filenameField)) {
+      reject(new Error(`Invalid filename: ${filenameField}`));
+      return;
+    }
+    const filePath = path.resolve(__dirname, filenameField);
+
     if (!fs.existsSync(filePath)) {
       logger.error('[ip-to-institution]: File not found');
       reject(new Error(`File not found: ${filenameField}`));

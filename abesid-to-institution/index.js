@@ -48,9 +48,16 @@ module.exports = function () {
 
   let institutions = {};
 
-  const filePath = path.resolve(__dirname, filenameField);
+
 
   return new Promise((resolve, reject) => {
+    if (!/^[a-z0-9_.-]+$/.test(filenameField)) {
+      reject(new Error(`Invalid filename: ${filenameField}`));
+      return;
+    }
+
+    const filePath = path.resolve(__dirname, filenameField);
+
     parseCSVToJSON(filePath)
       .then((jsonData) => {
         institutions = jsonData;

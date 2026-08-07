@@ -48,9 +48,11 @@ module.exports = function () {
 
   let idsAbes = {};
 
-  const filePath = path.resolve(__dirname, 'abesid_idp.tsv');
+
 
   return new Promise((resolve, reject) => {
+    const filePath = path.resolve(__dirname, 'abesid_idp.tsv');
+
     parseCSVToJSON(filePath)
       .then((jsonData) => {
         idsAbes = jsonData;
