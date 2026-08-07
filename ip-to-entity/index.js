@@ -37,7 +37,7 @@ module.exports = function () {
   let rangeIPs = [];
 
   return new Promise((resolve, reject) => {
-    if (!/^[a-z0-9_.-]+$/.test(filenameField)) {
+    if (!/^[a-zA-Z0-9_.-]+$/.test(filenameField)) {
       reject(new Error(`Invalid filename: ${filenameField}`));
       return;
     }
