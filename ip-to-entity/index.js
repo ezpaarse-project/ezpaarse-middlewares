@@ -26,7 +26,7 @@ module.exports = function () {
   const logger = this.logger;
 
   let sourceField = req.header('ip-to-entity-source-field');
-  let enrichedField = req.header('ip-to-entity-source-field-enriched-field');
+  let enrichedField = req.header('ip-to-entity-enriched-field');
   let filenameField = req.header('ip-to-entity-filename');
 
   if (!sourceField) { sourceField = 'ip'; }
@@ -87,7 +87,6 @@ module.exports = function () {
   function process(ec, next) {
     if (!ec || !ec[sourceField]) { return next(); }
 
-
     const simpleIP = simpleIPs[ec[sourceField]];
 
     if (simpleIP) {
@@ -102,6 +101,7 @@ module.exports = function () {
 
     const resultIP = findMatchingRangeId(ec[sourceField], rangeIPs);
 
+    console.log(enrichedField);
     if (resultIP) {
       ec[enrichedField] = resultIP._comment;
     }

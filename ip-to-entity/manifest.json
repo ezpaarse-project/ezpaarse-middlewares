@@ -1,6 +1,6 @@
 {
   "headers": [
     { "name": "ip-to-entity-source-field" },
-    { "name": "ip-to-entity-source-field-enriched-field" }
+    { "name": "ip-to-entity-enriched-field" }
   ]
 }
