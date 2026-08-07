@@ -17,11 +17,13 @@ Your EC needs a trackcode for enrichment.
 
 ## How to use
 
-### ezPAARSE process interface
+### ezPAARSE admin page
 
-You can use robots for an enrichment process.
+On the `/admin/middlewares` page, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
-![image](./docs/process-interface.png)
+### ezPAARSE process page
+
+On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ menu, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezp
 

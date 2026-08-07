@@ -1,0 +1,7 @@
+{
+  "headers": [
+    { "name": "ip-to-institution-source-field" },
+    { "name": "ip-to-institution-enriched-field" },
+    { "name": "ip-to-institution-filename" }
+  ]
+}

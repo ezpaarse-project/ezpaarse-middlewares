@@ -1,24 +1,28 @@
-# ebscohost
+# idp-to-institution
 
-Assign titles in the official [short names list](https://github.com/ezpaarse-project/ezpaarse-middlewares/blob/master/ebscohost/list.json)
+Add information about institution with abesID.
 
 ## Enriched fields
 
 | Name | Type | Description |
 | --- | --- | --- |
-| db_title  | String | Title of database. |
+| institutionName | String | Name of institution. |
 
 ## Prerequisites
 
-Your EC needs a print_identifier for enrichment. 
+idp-to-institution enrichment middleware needs abes-id.
+You need to find the file Etablissement.csv on Inist Gitlab on Istex repo and put at the folder of this middleware.
 
-**You must use ebscohost after filter, parser, deduplicator middleware.**
+**You must use idp-to-institution after filter, parser, deduplicator middleware.**
+
+### Example
 
 ## Headers
 
-+ **ebscohost-enrich** : Set to ``false`` to disable ebscohost enrichment. Enabled by default.
-+ **ebscohost-ttl** : Lifetime of cached documents, in seconds. Defaults to ``7 days (3600 * 24 * 7)``.
-+ **ebscohost-throttle** : Minimum time to wait between queries, in milliseconds. Defaults to ``200``ms.
+```
++ **idp-to-institution-source-field** : Fields in the ec for enrichment. "abes-id" by default.
++ **idp-to-institution-enriched-field** : Enriched field in the EC. "institution-name" by default.
+```
 
 ## How to use
 
@@ -32,31 +36,31 @@ On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ me
 
 ### ezp
 
-You can use ebscohost for an enrichment process with [ezp](https://github.com/ezpaarse-project/node-ezpaarse) like this:
+You can use idp-to-institution for an enrichment process with [ezp](https://github.com/ezpaarse-project/node-ezpaarse) like this:
 
 ```bash
 # enrich with one file
 ezp process <path of your file> \
   --host <host of your ezPAARSE instance> \
   --settings <settings-id> \
-  --header "ezPAARSE-Middlewares: ebscohost" \
+  --header "ezPAARSE-Middlewares: idp-to-institution" \
   --out ./result.csv
 
 # enrich with multiples files
 ezp bulk <path of your directory> \
   --host <host of your ezPAARSE instance> \
   --settings <settings-id> \
-  --header "ezPAARSE-Middlewares: ebscohost" 
+  --header "ezPAARSE-Middlewares: idp-to-institution" 
 
 ```
 
 ### curl
 
-You can use ebscohost for an enrichment process with curl like this:
+You can use idp-to-institution for an enrichment process with curl like this:
 
 ```bash
 curl -X POST -v http://localhost:59599 \
-  -H "ezPAARSE-Middlewares: ebscohost" \
+  -H "ezPAARSE-Middlewares: idp-to-institution" \
   -H "Log-Format-Ezproxy: <line format>" \
   -F "file=@<log file path>"
 

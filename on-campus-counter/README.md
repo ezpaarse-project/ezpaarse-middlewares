@@ -35,17 +35,13 @@ You can add or remove your on-campus-counter on ezpaarse config. It will be used
 }
 ```
 
-### ezPAARSE admin interface
+### ezPAARSE admin page
 
-You can add or remove on-campus-counter by default to all your enrichments. To do this, go to the middleware section of administration.
+On the `/admin/middlewares` page, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
-![image](./docs/admin-interface.png)
+### ezPAARSE process page
 
-### ezPAARSE process interface
-
-You can use on-campus-counter for an enrichment process.
-
-![image](./docs/process-interface.png)
+On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ menu, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezp
 

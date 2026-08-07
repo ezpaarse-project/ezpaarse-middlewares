@@ -1,32 +1,44 @@
-# idp-to-abesid
+# ip-to-entity
 
-Add ABES ID based on IDP.
+Add machineName with ip.
 
 ## Enriched fields
 
 | Name | Type | Description |
 | --- | --- | --- |
-| abes-id | String | ABES ID. |
+| machienName | String | Name of machine. |
 
 ## Prerequisites
 
-## Prerequisites
+ip-to-entity enrichment middleware needs ip.
+You need to find the file inist-ip.json.
 
-idp-to-abesid enrichment middleware needs idp in ec.
-
-**You must use idp-to-abesid after filter, parser, deduplicator middleware.**
+**You must use ip-to-entity after filter, parser, deduplicator middleware.**
 
 ## Example of structure of file
 
 ```
-ABESID	IDP
-ABES0123456789	https://ciboulette.institution.fr/idp/shibboleth
+{
+  "ips": [
+    {
+			"ip": "127.0.0.1",
+			"_comment": "Insititution 1"
+		},
+  ],
+  "ipRanges": [
+    {
+			"from": "128.0.0.100",
+			"to": "128.0.1.110",
+			"_comment": "Institution 2"
+		},
+  ]
+}
 ```
 
 ## Headers
 
-+ **idp-to-abesid-source-field** : Fields in the ec for enrichment. "login" by default.
-+ **idp-to-abesid-enriched-field** : Enriched fields in the CE. "abes-id" by default
++ **ip-to-entity-source-field** : Fields in the ec for enrichment. "ip" by default.
++ **ip-to-entity-enriched-field** : Enriched field in the EC. "institution-name" by default.
 
 ## How to use
 
@@ -40,31 +52,31 @@ On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ me
 
 ### ezp
 
-You can use idp-to-abesid for an enrichment process with [ezp](https://github.com/ezpaarse-project/node-ezpaarse) like this:
+You can use ip-to-entity for an enrichment process with [ezp](https://github.com/ezpaarse-project/node-ezpaarse) like this:
 
 ```bash
 # enrich with one file
 ezp process <path of your file> \
   --host <host of your ezPAARSE instance> \
   --settings <settings-id> \
-  --header "ezPAARSE-Middlewares: idp-to-abesid" \
+  --header "ezPAARSE-Middlewares: ip-to-entity" \
   --out ./result.csv
 
 # enrich with multiples files
 ezp bulk <path of your directory> \
   --host <host of your ezPAARSE instance> \
   --settings <settings-id> \
-  --header "ezPAARSE-Middlewares: idp-to-abesid" 
+  --header "ezPAARSE-Middlewares: ip-to-entity" 
 
 ```
 
 ### curl
 
-You can use idp-to-abesid for an enrichment process with curl like this:
+You can use ip-to-entity for an enrichment process with curl like this:
 
 ```bash
 curl -X POST -v http://localhost:59599 \
-  -H "ezPAARSE-Middlewares: idp-to-abesid" \
+  -H "ezPAARSE-Middlewares: ip-to-entity" \
   -H "Log-Format-Ezproxy: <line format>" \
   -F "file=@<log file path>"
 

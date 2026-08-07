@@ -47,17 +47,13 @@ You can use ezunpaywall with crossreft by placing it in front. This will save yo
 
 ## How to use
 
-### ezPAARSE admin interface
+### ezPAARSE admin page
 
-You can add crossref by default to all your enrichments, To do this, go to the middleware section of administration.
+On the `/admin/middlewares` page, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
-![image](./docs/admin-interface.png)
+### ezPAARSE process page
 
-### ezPAARSE process interface
-
-You can use crossref for an enrichment process. You just add the middleware.
-
-![image](./docs/process-interface.png)
+On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ menu, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezp
 

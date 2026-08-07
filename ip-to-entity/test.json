@@ -1,0 +1,15 @@
+{
+  "ips": [
+    {
+      "ip": "192.168.2.2",
+      "_comment": "One machine"
+    }
+  ],
+  "ipRanges": [
+    {
+      "from": "100.0.0.1",
+      "to": "100.0.5.255",
+      "_comment": "Workers"
+    }
+  ]
+}

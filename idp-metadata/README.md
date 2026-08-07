@@ -10,13 +10,13 @@ Fetches Identity Providers (IDP) list from Renater, and enrich EC with the IDP l
 
 ## How to use
 
-### ezPAARSE admin interface
+### ezPAARSE admin page
 
-You can add or remove idp-metadata by default to all your enrichments, provided you have added an API key in the config. To do this, go to the middleware section of administration.
+On the `/admin/middlewares` page, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
-### ezPAARSE process interface
+### ezPAARSE process page
 
-You can use idp-metadata for an enrichment process. You just add the middleware
+On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ menu, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezp
 
