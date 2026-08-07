@@ -31,15 +31,11 @@ ID_ETAB_001;123456789;Etablissement A;Type A;1 Rue Exemple, 75000 Exempleville;E
 
 ### ezPAARSE admin page
 
-You can add abesid-to-institution by default to all your enrichments, To do this, go to the middleware section of administration.
-
-![image](./docs/admin-interface.png)
+On the `/admin/middlewares` page, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezPAARSE process page
 
-You can use abesid-to-institution for an enrichment process. You just add the middleware.
-
-![image](./docs/process-interface.png)
+On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ menu, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezp
 

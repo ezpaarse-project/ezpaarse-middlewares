@@ -32,16 +32,11 @@ Some platforms may have private resources, to obtain enrichments on these platfo
 
 ### ezPAARSE admin page
 
-You can add omeka by default to all your enrichments, To do this, go to the middleware section of administration.
-
-![image](./docs/admin-interface.png)
-
+On the `/admin/middlewares` page, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezPAARSE process page
 
-You can use omeka for an enrichment process. You just add the middleware.
-
-![image](./docs/process-interface.png)
+On the `/process` page, under the “2 Settings” tab, in the ‘Settings’ menu, you can choose to move the middleware from “Available Middleware” to “Active Middleware for Processing.”
 
 ### ezp
 
