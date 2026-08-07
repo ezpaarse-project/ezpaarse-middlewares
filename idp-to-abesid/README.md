@@ -1,6 +1,6 @@
 # idp-to-abesid
 
-Add ABES ID based on IDP.
+Add ABESID with IDP.
 
 ## Enriched fields
 
