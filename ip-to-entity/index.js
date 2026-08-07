@@ -37,6 +37,11 @@ module.exports = function () {
   let rangeIPs = [];
 
   return new Promise((resolve, reject) => {
+    if (!/^[a-z0-9_.-]+$/.test(filenameField)) {
+      reject(new Error(`Invalid filename: ${filenameField}`));
+      return;
+    }
+
     const inistIpPath = path.resolve(__dirname, filenameField);
 
     if (!fs.existsSync(inistIpPath)) {
