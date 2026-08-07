@@ -1,6 +1,6 @@
 # idp-to-institution
 
-Add information about institution with abesID.
+Add information about institution with IDP.
 
 ## Enriched fields
 
@@ -10,7 +10,7 @@ Add information about institution with abesID.
 
 ## Prerequisites
 
-idp-to-institution enrichment middleware needs abes-id.
+idp-to-institution enrichment middleware needs IDP.
 You need to find the file Etablissement.csv on Inist Gitlab on Istex repo and put at the folder of this middleware.
 
 **You must use idp-to-institution after filter, parser, deduplicator middleware.**
@@ -20,7 +20,7 @@ You need to find the file Etablissement.csv on Inist Gitlab on Istex repo and pu
 ## Headers
 
 ```
-+ **idp-to-institution-source-field** : Fields in the ec for enrichment. "abes-id" by default.
++ **idp-to-institution-source-field** : Fields in the ec for enrichment. "login" by default.
 + **idp-to-institution-enriched-field** : Enriched field in the EC. "institution-name" by default.
 ```
 
