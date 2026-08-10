@@ -46,9 +46,9 @@ module.exports = function () {
   if (!enrichedField) { enrichedField = 'institutionName'; }
   if (!filenameField) { filenameField = 'listAll.csv'; }
 
+  this.job.outputFields.added.push(enrichedField);
+
   let institutions = {};
-
-
 
   return new Promise((resolve, reject) => {
     if (!/^[a-zA-Z0-9_.-]+$/.test(filenameField)) {

@@ -33,6 +33,8 @@ module.exports = function () {
   if (!enrichedField) { enrichedField = 'machineName'; }
   if (!filenameField) { filenameField = 'inist-ip.json'; }
 
+  this.job.outputFields.added.push(enrichedField);
+
   let simpleIPs = {};
   let rangeIPs = [];
 

@@ -35,6 +35,9 @@ module.exports = function () {
   if (!institutionNameEnrich) { institutionNameEnrich = false; }
   if (!filenameField) { filenameField = 'autorisation-abes.json'; }
 
+  this.job.outputFields.added.push(enrichedField);
+  this.job.outputFields.added.push('institutionName');
+
   let simpleIPs = {};
   let rangeIPs = [];
 

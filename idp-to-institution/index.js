@@ -17,6 +17,9 @@ module.exports = function () {
   if (!institutionNameEnrichedField) { institutionNameEnrichedField = 'institutionName'; }
   if (!idCouperinEnrichedField) { idCouperinEnrichedField = 'idCouperin'; }
 
+  this.job.outputFields.added.push(institutionNameEnrichedField);
+  this.job.outputFields.added.push(idCouperinEnrichedField);
+
   let idp;
 
   return new Promise((resolve, reject) => {

@@ -46,9 +46,9 @@ module.exports = function () {
   if (!sourceField) { sourceField = 'login'; }
   if (!enrichedField) { enrichedField = 'abes-id'; }
 
+  this.job.outputFields.added.push(enrichedField);
+
   let idsAbes = {};
-
-
 
   return new Promise((resolve, reject) => {
     const filePath = path.resolve(__dirname, 'abesid_idp.tsv');
