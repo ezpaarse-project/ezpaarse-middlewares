@@ -103,7 +103,6 @@ module.exports = function () {
 
     const resultIP = findMatchingRangeId(ec[sourceField], rangeIPs);
 
-    console.log(enrichedField);
     if (resultIP) {
       ec[enrichedField] = resultIP._comment;
     }
