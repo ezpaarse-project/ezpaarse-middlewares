@@ -45,9 +45,8 @@ module.exports = function () {
 
       try {
         const parsedData = JSON.parse(data);
-
         idp = parsedData.reduce((acc, objet) => acc.set(objet.idp, objet), new Map());
-
+        logger.info('[idp-to-institution]: Successfully read JSON File');
         resolve(process);
       } catch (error) {
         logger.error('[idp-to-institution]: Cannot parse ips');
