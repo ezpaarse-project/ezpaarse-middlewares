@@ -84,6 +84,13 @@ module.exports = function () {
         ? entry.enrichedFields.filter((f) => typeof f === 'string' && f.trim()).map((f) => f.trim())
         : [];
 
+      enrichedFields.forEach((field) => {
+        console.log(field);
+        if (!this.job.outputFields.added.includes(field)) {
+          this.job.outputFields.added.push(field);
+        }
+      });
+
       const dataDir = path.resolve(__dirname, 'data');
       const filePath = path.resolve(dataDir, filename);
       if (!filePath.startsWith(dataDir + path.sep)) {
