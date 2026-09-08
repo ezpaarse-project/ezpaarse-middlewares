@@ -85,7 +85,6 @@ module.exports = function () {
         : [];
 
       enrichedFields.forEach((field) => {
-        console.log(field);
         if (!this.job.outputFields.added.includes(field)) {
           this.job.outputFields.added.push(field);
         }
