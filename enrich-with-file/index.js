@@ -1,21 +1,42 @@
 'use strict';
 
 const fs = require('fs');
+const fsp = require('fs/promises');
 const path = require('path');
 
 const fileCache = new Map();
 
-function readFile(filePath) {
+async function readFile(filePath) {
   if (fileCache.has(filePath)) {
     return fileCache.get(filePath);
   }
 
-  const raw = fs.readFileSync(filePath, 'utf8');
+  const raw = await fsp.readFile(filePath, 'utf8');
   const content = JSON.parse(raw);
 
   fileCache.set(filePath, content);
 
   return content;
+}
+
+function indexContent(content, sourceField) {
+  const index = new Map();
+
+  if (!Array.isArray(content)) {
+    return index;
+  }
+
+  for (const row of content) {
+    if (!row || row[sourceField] === undefined) {
+      continue;
+    }
+
+    if (!index.has(row[sourceField])) {
+      index.set(row[sourceField], row);
+    }
+  }
+
+  return index;
 }
 
 module.exports = function () {
@@ -27,7 +48,7 @@ module.exports = function () {
   let configFile;
   let config = [];
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       configFile = JSON.parse(configHeader);
     } catch (e) {
@@ -58,12 +79,10 @@ module.exports = function () {
         continue;
       }
 
-      // check if enrichedFields is a string or an array
-      const rawEnrichedFields = typeof entry.enrichedFields === 'string' ? entry.enrichedFields : '';
-      const enrichedFields = rawEnrichedFields
-        .split(',')
-        .map((f) => f.trim())
-        .filter(Boolean);
+      // check if enrichedFields is an array of non-empty strings
+      const enrichedFields = Array.isArray(entry.enrichedFields)
+        ? entry.enrichedFields.filter((f) => typeof f === 'string' && f.trim()).map((f) => f.trim())
+        : [];
 
       const dataDir = path.resolve(__dirname, 'data');
       const filePath = path.resolve(dataDir, filename);
@@ -81,18 +100,20 @@ module.exports = function () {
 
       let content;
       try {
-        content = readFile(filePath);
+        content = await readFile(filePath);
       } catch (e) {
         logger.error(`[enrich-with-file]: Cannot read/parse file ${filename}: ${e.message}`);
         reject(new Error(`Cannot parse file: ${filename}`));
         return;
       }
 
+      const index = indexContent(content, sourceField);
+
       config.push({
         filename,
         sourceField,
         enrichedFields,
-        content
+        index
       });
     }
 
@@ -102,7 +123,7 @@ module.exports = function () {
   function process(ec, next) {
     if (!ec) { return next(); }
 
-    for (const { sourceField, enrichedFields, content } of config) {
+    for (const { sourceField, enrichedFields, index } of config) {
 
       // check if ec[sourceField] is present
       if (ec[sourceField] === undefined) {
@@ -114,14 +135,9 @@ module.exports = function () {
         continue;
       }
 
-      if (!Array.isArray(content)) {
-        continue;
-      }
-
       const value = ec[sourceField];
 
-      // check if the value is in the file
-      const record = content.find((row) => row && row[sourceField] === value);
+      const record = index.get(value);
 
       if (!record) {
         continue;

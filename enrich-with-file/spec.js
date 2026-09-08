@@ -51,12 +51,12 @@ describe('enrich-with-file', () => {
           {
             "filename":"test1.json",
             "sourceField": "webserviceRequest",
-            "enrichedFields":"webService,traitement"
+            "enrichedFields": ["webService", "traitement"]
           },
           {
             "filename":"test2.json",
             "sourceField": "webserviceRequest",
-            "enrichedFields":"test"
+            "enrichedFields": ["test"]
           }
         ]
       `;
