@@ -1,6 +1,5 @@
 'use strict';
 
-const fs = require('fs');
 const fsp = require('fs/promises');
 const path = require('path');
 
@@ -39,7 +38,17 @@ function indexContent(content, sourceField) {
   return index;
 }
 
-module.exports = function () {
+async function fileExists(path) {
+  try {
+    const stats = await fsp.stat(path);
+    return stats.isFile();
+  } catch (err) {
+    if (err.code === 'ENOENT') return false;
+    throw err;
+  }
+}
+
+module.exports = async function () {
   const req = this.request;
   const logger = this.logger;
 
@@ -48,85 +57,78 @@ module.exports = function () {
   let configFile;
   let config = [];
 
-  return new Promise(async (resolve, reject) => {
+  try {
+    configFile = JSON.parse(configHeader);
+  } catch (e) {
+    logger.error(`Cannot parse the content of the config header: ${configHeader}`);
+    return Promise.reject(e);
+  }
+
+  for (let key in configFile) {
+    const entry = configFile[key];
+
+    // if entry is null/undefined or is not an object
+    if (!entry || typeof entry !== 'object') {
+      logger.error('[enrich-with-file]: Invalid config entry, skipping');
+      continue;
+    }
+
+    const filename = entry.filename;
+    const sourceField = entry.sourceField;
+
+    // check if filename is a string and defined
+    if (typeof filename !== 'string' || !filename) {
+      logger.error('[enrich-with-file]: Missing or invalid filename, skipping entry');
+      continue;
+    }
+    // check if sourceField is a string and defined
+    if (typeof sourceField !== 'string' || !sourceField) {
+      logger.error('[enrich-with-file]: Missing or invalid sourceField, skipping entry');
+      continue;
+    }
+
+    // check if enrichedFields is an array of non-empty strings
+    const enrichedFields = Array.isArray(entry.enrichedFields)
+      ? entry.enrichedFields.filter((f) => typeof f === 'string' && f.trim()).map((f) => f.trim())
+      : [];
+
+    enrichedFields.forEach((field) => {
+      if (!this.job.outputFields.added.includes(field)) {
+        this.job.outputFields.added.push(field);
+      }
+    });
+
+    const dataDir = path.resolve(__dirname, 'data');
+    const filePath = path.resolve(dataDir, filename);
+    if (!filePath.startsWith(dataDir + path.sep)) {
+      logger.error(`[enrich-with-file]: Invalid filename (path traversal): ${filename}`);
+      return Promise.reject(new Error(`Invalid filename: ${filename}`));
+    }
+
+    if (!await fileExists(filePath)) {
+      logger.error('[enrich-with-file]: File not found');
+      return Promise.reject(new Error(`File not found: ${filename}`));
+    }
+
+    let content;
     try {
-      configFile = JSON.parse(configHeader);
+      content = await readFile(filePath);
     } catch (e) {
-      reject(new Error(`Cannot parse the content of the config header: ${configHeader}`));
-      return;
+      logger.error(`[enrich-with-file]: Cannot read/parse file ${filename}: ${e.message}`);
+      return Promise.reject(new Error(`Cannot parse file: ${filename}`));
     }
 
-    for (let key in configFile) {
-      const entry = configFile[key];
+    const index = indexContent(content, sourceField);
 
-      // if entry is null/undefined or is not an object
-      if (!entry || typeof entry !== 'object') {
-        logger.error('[enrich-with-file]: Invalid config entry, skipping');
-        continue;
-      }
+    config.push({
+      filename,
+      sourceField,
+      enrichedFields,
+      index
+    });
+  }
 
-      const filename = entry.filename;
-      const sourceField = entry.sourceField;
-
-      // check if filename is a string and defined
-      if (typeof filename !== 'string' || !filename) {
-        logger.error('[enrich-with-file]: Missing or invalid filename, skipping entry');
-        continue;
-      }
-      // check if sourceField is a string and defined
-      if (typeof sourceField !== 'string' || !sourceField) {
-        logger.error('[enrich-with-file]: Missing or invalid sourceField, skipping entry');
-        continue;
-      }
-
-      // check if enrichedFields is an array of non-empty strings
-      const enrichedFields = Array.isArray(entry.enrichedFields)
-        ? entry.enrichedFields.filter((f) => typeof f === 'string' && f.trim()).map((f) => f.trim())
-        : [];
-
-      enrichedFields.forEach((field) => {
-        if (!this.job.outputFields.added.includes(field)) {
-          this.job.outputFields.added.push(field);
-        }
-      });
-
-      const dataDir = path.resolve(__dirname, 'data');
-      const filePath = path.resolve(dataDir, filename);
-      if (!filePath.startsWith(dataDir + path.sep)) {
-        logger.error(`[enrich-with-file]: Invalid filename (path traversal): ${filename}`);
-        reject(new Error(`Invalid filename: ${filename}`));
-        return;
-      }
-
-      if (!fs.existsSync(filePath)) {
-        logger.error('[enrich-with-file]: File not found');
-        reject(new Error(`File not found: ${filename}`));
-        return;
-      }
-
-      let content;
-      try {
-        content = await readFile(filePath);
-      } catch (e) {
-        logger.error(`[enrich-with-file]: Cannot read/parse file ${filename}: ${e.message}`);
-        reject(new Error(`Cannot parse file: ${filename}`));
-        return;
-      }
-
-      const index = indexContent(content, sourceField);
-
-      config.push({
-        filename,
-        sourceField,
-        enrichedFields,
-        index
-      });
-    }
-
-    resolve(process);
-  });
-
-  function process(ec, next) {
+  return function process(ec, next) {
     if (!ec) { return next(); }
 
     for (const { sourceField, enrichedFields, index } of config) {
@@ -157,5 +159,5 @@ module.exports = function () {
     }
 
     next();
-  }
+  };
 };
