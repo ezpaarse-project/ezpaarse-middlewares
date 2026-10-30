@@ -33,6 +33,9 @@ Your EC needs a DOI for enrichment.
 + **openalex-buffer-size** : Maximum number of memorized access events before sending a request. Defaults to ``1000``.
 + **openalex-max-attempts** : Maximum number of trials before passing the EC in error. Defaults to ``5``.
 + **openalex-apikey** : apikey to use openalex.
++ **openalex-use-gateway** : use Inist-CNRS gateway.
++ **openalex-host-gateway** : host of Inist-CNRS gateway.
++ **openalex-apikey-gateway** : API key for Inist-CNRS gateway.
 
 ## How to use
 
