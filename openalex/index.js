@@ -29,11 +29,14 @@ module.exports = function () {
   // use Inist-CNRS gateway
   let useGateway = parseInt(req.header('openalex-use-gateway'));
   // host of Inist-CNRS gateway
-  let hostInistGateway = parseInt(req.header('openalex-host-gateway'));
+  let baseurlInistGateway = parseInt(req.header('openalex-baseurl-gateway'));
   // API key for Inist-CNRS gateway
   let apiKeyGateway = parseInt(req.header('openalex-apikey-gateway'));
 
-  if (!hostInistGateway) { hostInistGateway = 'https://openalex.inist.fr'; }
+  if (!/inist\.fr$/i.test(baseurlInistGateway)) {
+    throw new Error(`Invalid gateway host "${baseurlInistGateway}": expected an inist.fr domain`);
+  }
+  if (!baseurlInistGateway) { baseurlInistGateway = 'https://openalex.inist.fr'; }
   if (isNaN(packetSize)) { packetSize = 100; }
   if (isNaN(bufferSize)) { bufferSize = 1000; }
   if (isNaN(throttle)) { throttle = 100; }
@@ -187,7 +190,8 @@ module.exports = function () {
     return new Promise((resolve, reject) => {
       const options = {
         method: 'GET',
-        uri: useGateway ? `${hostInistGateway}/gateway/openalex` : 'https://api.openalex.org/works',
+        uri: useGateway ? `${baseurlInistGateway}/gateway/openalex`
+          : 'https://api.openalex.org/works',
         json: true,
         qs: { filter: `doi:${dois.join('|')}` },
         headers: {},
