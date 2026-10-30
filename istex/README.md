@@ -1,6 +1,7 @@
 # istex
 
 Fetches [istex](http://www.istex.fr/) data from their [API](https://api.istex.fr/documentation/).
+This middleware enriches the ECs that come from the ISTEX API and those that come from the publisher Elsevier.
 
 **This middleware is activated by default.**
 
