@@ -27,11 +27,11 @@ module.exports = function () {
   // Maximum number of trials before passing the EC in error
   let maxAttempts = parseInt(req.header('openalex-max-attempts'));
   // use Inist-CNRS gateway
-  let useGateway = parseInt(req.header('openalex-use-gateway'));
+  let useGateway = req.header('openalex-use-gateway');
   // host of Inist-CNRS gateway
-  let baseurlInistGateway = parseInt(req.header('openalex-baseurl-gateway'));
+  let baseurlInistGateway = req.header('openalex-baseurl-gateway');
   // API key for Inist-CNRS gateway
-  let apiKeyGateway = parseInt(req.header('openalex-apikey-gateway'));
+  let apiKeyGateway = req.header('openalex-apikey-gateway');
 
   if (!/\.inist\.fr$/i.test(baseurlInistGateway)) {
     throw new Error(`Invalid gateway host "${baseurlInistGateway}": expected an inist.fr domain`);
