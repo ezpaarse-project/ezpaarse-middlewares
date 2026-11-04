@@ -33,9 +33,12 @@ module.exports = function () {
   // API key for Inist-CNRS gateway
   let apiKeyGateway = req.header('openalex-apikey-gateway');
 
-  if (!/\.inist\.fr$/i.test(baseurlInistGateway)) {
-    throw new Error(`Invalid gateway host "${baseurlInistGateway}": expected an inist.fr domain`);
+  const { hostname } = new URL(baseurlInistGateway);
+
+  if (!/(^|\.)inist\.fr$/i.test(hostname)) {
+    throw new Error(`Invalid gateway host "${hostname}": expected an inist.fr domain`);
   }
+
   if (!baseurlInistGateway) { baseurlInistGateway = 'https://openalex.inist.fr'; }
   if (isNaN(packetSize)) { packetSize = 100; }
   if (isNaN(bufferSize)) { bufferSize = 1000; }
