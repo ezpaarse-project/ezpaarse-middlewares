@@ -10,15 +10,18 @@ This middleware enriches the ECs that come from the ISTEX API and those that com
 | Name | Type | Description |
 | --- | --- | --- |
 | mime | String | format of resource. (HTML, PDF, VIDEO, etc) |
+| rtype | String | type of consultation. |
 | publication_title | String | Name of publication. | 
 | publisher_name | String | Name of publisher. |
+| istex_genre | String | type of resource. (article, book, conference, thesis, report etc.) | 
+| language | String | Lang of resource. |
+| subject | String | subject, thematic of resource. |  
 | print_identifier | Number | ISBN or ISSN. | 
 | online_identifier | Number | EISBN or EISSN. | 
-| subject | String | subject, thematic of resource. | 
 | doi | String | DOI of resource. | 
 | ark | String | ARK of resource. | 
-| istex_genre | String | type of resource. (article, book, conference, thesis, report etc.) | 
-| language | String | Lang of resource. | 
+| access_type | String | The OA status, or color, of this resource.  |
+| oa_status | String | open access status|
 
 ## Prerequisites
 
