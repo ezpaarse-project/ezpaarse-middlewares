@@ -160,7 +160,8 @@ module.exports = function () {
    * @param {Object} result the document used to enrich the EC
    */
   function enrichEc(ec, result) {
-    const isOa = result.open_access.is_oa;
+    const isOa = result && result.open_access && result.open_access.is_oa;
+    const oaStatus = result && result.open_access && result.open_access.oa_status || '';
 
     const journalIsInDoaj = result && result.best_oa_location && result.best_oa_location.source
       && result.best_oa_location.source.is_in_doaj;
@@ -176,7 +177,7 @@ module.exports = function () {
     ec.publication_date = result.publication_date || '';
     ec.language = result.language || '';
     ec.is_oa = typeof isOa === 'boolean' ? isOa : undefined;
-    ec.oa_status = result.open_access.oa_status || '';
+    ec.oa_status = oaStatus || '';
     ec.journal_is_in_doaj = typeof journalIsInDoaj === 'boolean' ? journalIsInDoaj : undefined;
     ec.issnl = issnl || '';
     ec.type = result.type || '';
@@ -191,10 +192,11 @@ module.exports = function () {
     report.inc('general', 'openalex-queries');
 
     return new Promise((resolve, reject) => {
+      const uri = useGateway
+        ? `${baseurlInistGateway}/gateway/openalex/works` : 'https://api.openalex.org/works';
       const options = {
         method: 'GET',
-        uri: useGateway ? `${baseurlInistGateway}/gateway/openalex`
-          : 'https://api.openalex.org/works',
+        uri,
         json: true,
         qs: { filter: `doi:${dois.join('|')}` },
         headers: {},

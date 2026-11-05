@@ -5,6 +5,9 @@
     { "name": "openalex-throttle" },
     { "name": "openalex-paquet-size" },
     { "name": "openalex-buffer-size" },
-    { "name": "openalex-apikey" }
+    { "name": "openalex-apikey" },
+    { "name": "openalex-use-gateway" },
+    { "name": "openalex-baseurl-gateway" },
+    { "name": "openalex-apikey-gateway" }
   ]
 }
